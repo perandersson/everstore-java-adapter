@@ -160,7 +160,7 @@ public class VanillaDataStorageSender implements Runnable {
         callbacks.add(request.header.requestUID, dsr -> {
             final CommitTransactionResponse response = (CommitTransactionResponse) dsr.response;
             if (response.success)
-                commitResult.complete(new CommitResult(true, EMPTY_LIST, response.journalSize));
+                commitResult.complete(new CommitResult(true, events, response.journalSize));
             else
                 commitResult.complete(new CommitResult(false, events, response.journalSize));
         }, () -> commitResult.completeExceptionally(new CommitTransactionFailed(transaction.name)));

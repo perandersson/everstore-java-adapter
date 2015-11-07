@@ -3,6 +3,10 @@ package everstore.api;
 public final class JournalSize {
     public final int value;
 
+    protected JournalSize() {
+        this.value = 0;
+    }
+
     public JournalSize(int value) {
         this.value = value;
     }
@@ -19,7 +23,25 @@ public final class JournalSize {
         return value < rhs.value;
     }
 
-    public int sub(JournalSize rhs) { return value - rhs.value; }
+    public int sub(JournalSize rhs) {
+        return value - rhs.value;
+    }
 
-    public static final JournalSize ZERO = new JournalSize(0);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        JournalSize that = (JournalSize) o;
+
+        return value == that.value;
+
+    }
+
+    @Override
+    public int hashCode() {
+        return value;
+    }
+
+    public static final JournalSize ZERO = new JournalSize();
 }

@@ -6,7 +6,7 @@ public interface Serializer {
 
     <T> String convertToString(T object);
 
-    Object convertFromString(String value);
+    <T> T convertFromString(String value);
 
     <T> Set<String> convertToTypes(T object);
 }
