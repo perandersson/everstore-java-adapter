@@ -2,6 +2,16 @@ This repository contains the source code for both the adapter and various exampl
 
 ## Projects
 
+### Core
+
+This project contains the Java API for using Everstore.
+
+### Vanilla
+
+This is the default data-storage implementation
+
+### Java8
+
 ## Examples
 
 ### Example1
