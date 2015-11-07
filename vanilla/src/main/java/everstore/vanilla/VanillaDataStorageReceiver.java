@@ -113,7 +113,9 @@ public class VanillaDataStorageReceiver implements Runnable {
     }
 
     private void uncaughtException(Throwable e) {
-        e.printStackTrace();
+        if (running.get()) {
+            e.printStackTrace();
+        }
         close();
     }
 }

@@ -6,7 +6,7 @@ import everstore.api.storage.DataStorageFactory;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 
 import static everstore.api.validation.Validation.require;
 
@@ -44,7 +44,7 @@ public class Adapter {
      * @return A journal
      * @throws IllegalArgumentException If the supplied journal name is invalid.
      */
-    public Future<Transaction> openTransaction(final String name) {
+    public CompletableFuture<Transaction> openTransaction(final String name) {
         require(name.length() > 2 && name.charAt(0) == '/', "Argument 'name' must start with a '/'");
         require(!name.contains(".."), "Argument 'name' cannot contain '..'");
         require(!name.contains("//"), "Argument 'name' cannot contain '//'");

@@ -1,15 +1,15 @@
 package everstore.api;
 
 import java.util.List;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 
 public interface Transaction {
 
     JournalSize size();
 
-    Future<List<Object>> read();
+    CompletableFuture<List<Object>> read();
 
-    Future<List<Object>> readFromOffset(Offset offset);
+    CompletableFuture<List<Object>> readFromOffset(Offset offset);
 
     /**
      * Insert an event of any type to this journal
@@ -19,7 +19,7 @@ public interface Transaction {
      */
     <T> void add(T event);
 
-    Future<CommitResult> commit();
+    CompletableFuture<CommitResult> commit();
 
-    Future<Boolean> rollback();
+    CompletableFuture<Boolean> rollback();
 }

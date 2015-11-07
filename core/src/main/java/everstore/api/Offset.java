@@ -3,6 +3,10 @@ package everstore.api;
 public final class Offset {
     public final int value;
 
+    protected Offset() {
+        this.value = 0;
+    }
+
     public Offset(int value) {
         this.value = value;
     }
@@ -19,5 +23,5 @@ public final class Offset {
         return value - offset.value;
     }
 
-    public static final Offset ZERO = new Offset(0);
+    public static final Offset ZERO = new Offset();
 }
