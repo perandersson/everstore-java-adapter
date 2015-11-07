@@ -3,10 +3,7 @@ package everstore.vanilla;
 import everstore.api.CommitResult;
 import everstore.api.Offset;
 import everstore.api.Transaction;
-import everstore.api.exception.CommitTransactionFailed;
-import everstore.api.exception.OpenTransactionFailed;
-import everstore.api.exception.ReadEventsFailed;
-import everstore.api.exception.RollbackFailed;
+import everstore.api.exception.*;
 import everstore.api.serialization.Serializer;
 import everstore.api.snapshot.EventsSnapshotEntry;
 import everstore.api.snapshot.EventsSnapshotManager;
@@ -189,6 +186,24 @@ public class VanillaDataStorageSender implements Runnable {
             throw new RollbackFailed(transaction.name, e);
         }
         return rollbackResult;
+    }
+
+    public CompletableFuture<Boolean> journalExists(final String name) {
+        final DataStoreRequest request = JournalExistsRequest.create(name, nextRequestUID());
+        final CompletableFuture<Boolean> existsResult = new CompletableFuture<>();
+
+        callbacks.add(request.header.requestUID, dsr -> {
+            final JournalExistsResponse response = (JournalExistsResponse) dsr.response;
+            existsResult.complete(response.exists);
+        }, () -> existsResult.completeExceptionally(new JournalExistsException(name)));
+
+        try {
+            requests.put(request);
+        } catch (InterruptedException e) {
+            throw new JournalExistsException(name, e);
+        }
+
+        return existsResult;
     }
 
     public CompletableFuture<List<Object>> readEventsFromJournal(final VanillaTransaction transaction, Offset offset) {

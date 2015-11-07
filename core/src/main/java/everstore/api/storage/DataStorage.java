@@ -17,6 +17,8 @@ public interface DataStorage {
 
     CompletableFuture<Boolean> rollbackTransaction(Transaction transaction);
 
+    CompletableFuture<Boolean> journalExists(String name);
+
     /**
      * Close the datastorage and cleanup any opened resources
      */

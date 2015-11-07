@@ -51,13 +51,13 @@ public class App {
     }
 
     private void run() {
-        // Setup a user - just so that we have some data for our example
-        setupUser(new UserId(123));
-
-        // Try to get a user
-        final CompletableFuture<User> futureUser = findUser(new UserId(123));
-
         try {
+            // Setup a user - just so that we have some data for our example
+            setupUser(new UserId(123));
+
+            // Try to get a user
+            final CompletableFuture<User> futureUser = findUser(new UserId(123));
+
             final User user = futureUser.get();
             System.out.println(user);
         } catch (ExecutionException e) {
@@ -73,7 +73,7 @@ public class App {
         final CompletableFuture<Transaction> transaction =
                 adapter.openTransaction("/java/example2/user-" + userId.value);
         return transaction.thenCompose(Transaction::read)
-                .thenApply(this::loadUserFromEvents);
+                .thenApplyAsync(this::loadUserFromEvents);
     }
 
     private User loadUserFromEvents(List<Object> events) {
@@ -87,18 +87,22 @@ public class App {
         return user;
     }
 
-    private void setupUser(UserId userId) {
-        final CompletableFuture<Transaction> transaction =
-                adapter.openTransaction("/java/example2/user-" + userId.value);
-        final CompletableFuture<CommitResult> result = transaction.thenCompose(t -> {
-            t.add(new UserCreated(userId.value, "Per", "Andersson"));
-            return t.commit();
-        });
+    private void setupUser(UserId userId) throws ExecutionException, InterruptedException {
+        final String name = "/java/example2/user-" + userId.value;
 
-        try {
-            CompletableFuture.allOf(result).get();
-        } catch (Exception e) {
-            e.printStackTrace();
+        final CompletableFuture<Boolean> journalExists = adapter.journalExists(name);
+        if (!journalExists.get()) {
+            final CompletableFuture<Transaction> transaction = adapter.openTransaction(name);
+            final CompletableFuture<CommitResult> result = transaction.thenCompose(t -> {
+                t.add(new UserCreated(userId.value, "Per", "Andersson"));
+                return t.commit();
+            });
+
+            try {
+                result.get();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }

@@ -72,6 +72,11 @@ public class VanillaDataStorage implements DataStorage {
     }
 
     @Override
+    public CompletableFuture<Boolean> journalExists(final String name) {
+        return sender.journalExists(name);
+    }
+
+    @Override
     public void close() {
         try {
             if (receiver != null)

@@ -92,6 +92,8 @@ public class VanillaDataStorageReceiver implements Runnable {
                 return new ReadJournalResponseParser(null, false, byteStream, new byte[0]);
             case ROLLBACK_TRANSACTION:
                 return RollbackResponseParser.INSTANCE;
+            case JOURNAL_EXISTS:
+                return JournalExistsResponseParser.INSTANCE;
             case ERROR:
                 return ErrorResponseParser.INSTANCE;
             default:

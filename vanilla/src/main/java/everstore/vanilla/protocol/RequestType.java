@@ -7,7 +7,8 @@ public enum RequestType {
     NEW_TRANSACTION(4),
     COMMIT_TRANSACTION(5),
     ROLLBACK_TRANSACTION(6),
-    READ_JOURNAL(7);
+    READ_JOURNAL(7),
+    JOURNAL_EXISTS(8);
 
     public final int id;
 
@@ -23,6 +24,7 @@ public enum RequestType {
             case 5: return COMMIT_TRANSACTION;
             case 6: return ROLLBACK_TRANSACTION;
             case 7: return READ_JOURNAL;
+            case 8: return JOURNAL_EXISTS;
             default: return INVALID;
         }
     }

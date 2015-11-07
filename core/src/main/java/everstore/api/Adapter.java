@@ -45,12 +45,35 @@ public class Adapter {
      * @throws IllegalArgumentException If the supplied journal name is invalid.
      */
     public CompletableFuture<Transaction> openTransaction(final String name) {
-        require(name.length() > 2 && name.charAt(0) == '/', "Argument 'name' must start with a '/'");
-        require(!name.contains(".."), "Argument 'name' cannot contain '..'");
-        require(!name.contains("//"), "Argument 'name' cannot contain '//'");
+        validateName(name);
 
         nextStorage++;
         final DataStorage storage = storages.get(nextStorage % storages.size());
         return storage.openTransaction(name);
+    }
+
+    /**
+     * Check if the supplied journal already exists or not
+     *
+     * @param name The name of the journal
+     * @return TRUE if the supplied journal exists; FALSE otherwise
+     */
+    public CompletableFuture<Boolean> journalExists(final String name) {
+        validateName(name);
+
+        nextStorage++;
+        final DataStorage storage = storages.get(nextStorage % storages.size());
+        return storage.journalExists(name);
+    }
+
+    /**
+     * Validate the journal name
+     *
+     * @param name
+     */
+    private static void validateName(final String name) {
+        require(name.length() > 2 && name.charAt(0) == '/', "Argument 'name' must start with a '/'");
+        require(!name.contains(".."), "Argument 'name' cannot contain '..'");
+        require(!name.contains("//"), "Argument 'name' cannot contain '//'");
     }
 }
