@@ -4,16 +4,17 @@ import everstore.api.Adapter;
 import everstore.api.AdapterConfig;
 import everstore.api.CommitResult;
 import everstore.api.Transaction;
-import everstore.java.serialization.jackson.JacksonSerializer;
 import everstore.vanilla.VanillaDataStorageFactory;
 
 import java.util.concurrent.CompletableFuture;
+
+import static everstore.java.serialization.Serializers.defaultSerializer;
 
 public class App {
     public static void main(String[] args) throws Exception {
         // Adapter configuration
         final AdapterConfig config = new AdapterConfig("admin", "passwd",
-                "localhost", (short) 6929, 6, new JacksonSerializer(),
+                "localhost", (short) 6929, 6, defaultSerializer(),
                 new VanillaDataStorageFactory());
 
         // Connect to the server

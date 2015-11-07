@@ -1,7 +1,7 @@
 package everstore.api;
 
 import everstore.api.serialization.Serializer;
-import everstore.api.snapshot.EventsSnapshotManager;
+import everstore.api.snapshot.EventsSnapshotConfig;
 import everstore.api.snapshot.SnapshotManager;
 import everstore.api.storage.DataStorageFactory;
 
@@ -24,7 +24,7 @@ public final class AdapterConfig {
     public final Serializer serializer;
     public final DataStorageFactory dataStorageFactory;
     public final Optional<SnapshotManager> snapshotManager;
-    public final Optional<EventsSnapshotManager> eventsSnapshotManager;
+    public final Optional<EventsSnapshotConfig> eventsSnapshotConfig;
 
     public AdapterConfig(String username, String password, String hostname, short port, int numConnections,
                          Serializer serializer, DataStorageFactory dataStorageFactory) {
@@ -34,7 +34,7 @@ public final class AdapterConfig {
     public AdapterConfig(String username, String password, String hostname, short port, int numConnections,
                          int timeout, int bufferSize, Serializer serializer,
                          DataStorageFactory dataStorageFactory, Optional<SnapshotManager> snapshotManager,
-                         Optional<EventsSnapshotManager> eventsSnapshotManager) {
+                         Optional<EventsSnapshotConfig> eventsSnapshotConfig) {
         require(hostname.length() > 0, "You must supply a valid hostname");
         require(port > 0, "The port used for connecting to the server must be a valid port");
         require(numConnections > 0, "The number of connections must be larger than 0");
@@ -52,7 +52,7 @@ public final class AdapterConfig {
         this.serializer = serializer;
         this.dataStorageFactory = dataStorageFactory;
         this.snapshotManager = snapshotManager;
-        this.eventsSnapshotManager = eventsSnapshotManager;
+        this.eventsSnapshotConfig = eventsSnapshotConfig;
     }
 
 }

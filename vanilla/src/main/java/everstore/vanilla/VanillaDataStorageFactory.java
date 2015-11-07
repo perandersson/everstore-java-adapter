@@ -11,7 +11,7 @@ public class VanillaDataStorageFactory implements DataStorageFactory {
     @Override
     public DataStorage create(AdapterConfig config, String name) throws IOException {
         final VanillaDataStorage storage = new VanillaDataStorage(config.username, config.password, config.hostname,
-                config.port, config.bufferSize, name, config.serializer, config.eventsSnapshotManager);
+                config.port, config.bufferSize, name, config.serializer, config.eventsSnapshotConfig);
         storage.connect();
         return storage;
     }

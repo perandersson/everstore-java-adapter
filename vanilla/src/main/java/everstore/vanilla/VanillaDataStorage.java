@@ -4,6 +4,7 @@ import everstore.api.CommitResult;
 import everstore.api.Offset;
 import everstore.api.Transaction;
 import everstore.api.serialization.Serializer;
+import everstore.api.snapshot.EventsSnapshotConfig;
 import everstore.api.snapshot.EventsSnapshotManager;
 import everstore.api.storage.DataStorage;
 import everstore.vanilla.callback.RequestResponseCallbacks;
@@ -19,7 +20,6 @@ import java.nio.ByteOrder;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Stream;
 
 public class VanillaDataStorage implements DataStorage {
 
@@ -38,7 +38,7 @@ public class VanillaDataStorage implements DataStorage {
 
     public VanillaDataStorage(String username, String password,
                               final String hostname, final short port, final int bufferSize,
-                              final String name, final Serializer serializer, final Optional<EventsSnapshotManager> snapshotManager) throws IOException {
+                              final String name, final Serializer serializer, final Optional<EventsSnapshotConfig> eventsSnapshotConfig) throws IOException {
         final InetAddress address = InetAddress.getByName(hostname);
         this.client = new Socket(address, port);
         this.client.setSendBufferSize(bufferSize);
@@ -48,7 +48,7 @@ public class VanillaDataStorage implements DataStorage {
         this.password = password;
         this.name = name;
         this.serializer = serializer;
-        this.snapshotManager = snapshotManager;
+        this.snapshotManager = eventsSnapshotConfig.map(c -> c.eventsSnapshotManagerFactory.create(c));
     }
 
     @Override
