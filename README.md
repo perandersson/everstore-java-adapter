@@ -1,4 +1,4 @@
-This repository contains the source code for both the adapter and various examples.
+This repository contains the source code for the adapter used to connect to https://github.com/perandersson/everstore-server . It also contains examples on how to use it.
 
 ## Projects
 
