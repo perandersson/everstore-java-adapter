@@ -1,12 +1,13 @@
 package everstore.vanilla.protocol.messages;
 
 import everstore.api.JournalSize;
-import everstore.api.Offset;
-import everstore.vanilla.HeaderProperties;
 import everstore.vanilla.RequestUID;
 import everstore.vanilla.WorkerUID;
 import everstore.vanilla.io.EndianAwareOutputStream;
-import everstore.vanilla.protocol.*;
+import everstore.vanilla.protocol.Constants;
+import everstore.vanilla.protocol.DataStoreRequest;
+import everstore.vanilla.protocol.Header;
+import everstore.vanilla.protocol.MessageRequest;
 
 import java.io.IOException;
 
@@ -15,10 +16,10 @@ import static everstore.vanilla.protocol.RequestType.READ_JOURNAL;
 
 public final class ReadJournalRequest implements MessageRequest {
     public final String journalName;
-    public final Offset offset;
+    public final JournalSize offset;
     public final JournalSize journalSize;
 
-    public ReadJournalRequest(String journalName, Offset offset, JournalSize journalSize) {
+    public ReadJournalRequest(String journalName, JournalSize offset, JournalSize journalSize) {
         this.journalName = journalName;
         this.offset = offset;
         this.journalSize = journalSize;
@@ -37,7 +38,7 @@ public final class ReadJournalRequest implements MessageRequest {
         return Constants.INTEGER * 3 + journalName.length();
     }
 
-    public static DataStoreRequest create(String journalName, Offset offset, JournalSize journalSize,
+    public static DataStoreRequest create(String journalName, JournalSize offset, JournalSize journalSize,
                                           RequestUID requestUID, WorkerUID workerUID) {
         final ReadJournalRequest body = new ReadJournalRequest(journalName, offset, journalSize);
         final Header header = new Header(READ_JOURNAL, body.size(), requestUID, NONE, workerUID);

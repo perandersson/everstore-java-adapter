@@ -9,7 +9,7 @@ public interface Transaction {
 
     CompletableFuture<List<Object>> read();
 
-    CompletableFuture<List<Object>> readFromOffset(Offset offset);
+    CompletableFuture<List<Object>> readFromOffset(JournalSize offset);
 
     /**
      * Insert an event of any type to this journal

@@ -61,6 +61,7 @@ public final class ReadJournalResponseParser implements ResponseParser {
         // Fill the byte array with the previous data blob
         byteStream.insert(state.bytesLeft);
 
+        // The actual events data
         int numBytes = stream.readInt();
         stream.read(numBytes, byteStream);
 
@@ -71,7 +72,7 @@ public final class ReadJournalResponseParser implements ResponseParser {
                 return readJournal(byteStream.buffer, byteStream.count, true);
             }
         } else {
-            return new State(new ReadJournalResponse(JournalSize.ZERO, new ArrayList<>()), true, new byte[0]);
+            return new State(new ReadJournalResponse(new ArrayList<>()), true, new byte[0]);
         }
     }
 
@@ -96,11 +97,7 @@ public final class ReadJournalResponseParser implements ResponseParser {
             events.add(new Event(line, empty()));
         }
 
-        final JournalSize previousSize = state.readJournalResponse != null ?
-                state.readJournalResponse.journalSize : JournalSize.ZERO;
-        final JournalSize totalBytes = new JournalSize(bytes.length + previousSize.value);
-
         // Return the resulting state
-        return new State(new ReadJournalResponse(totalBytes, events), eof, reader.bytesLeft());
+        return new State(new ReadJournalResponse(events), eof, reader.bytesLeft());
     }
 }

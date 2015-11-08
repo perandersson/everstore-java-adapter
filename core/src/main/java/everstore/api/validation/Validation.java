@@ -1,7 +1,14 @@
 package everstore.api.validation;
 
 public final class Validation {
-    public static void require(boolean check, String message) {
+
+    /**
+     * Syntactic sugar for handling and throwing exceptions if a comparison fails
+     *
+     * @param check
+     * @param message
+     */
+    public static void require(final boolean check, final String message) {
         if (!check)
             throw new IllegalArgumentException(message);
     }

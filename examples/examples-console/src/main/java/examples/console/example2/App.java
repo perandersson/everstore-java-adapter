@@ -6,28 +6,34 @@ import everstore.api.CommitResult;
 import everstore.api.Transaction;
 import everstore.api.snapshot.EventsSnapshotConfig;
 import everstore.vanilla.VanillaDataStorageFactory;
+import examples.console.example2.events.NameUpdated;
 import examples.console.example2.events.UserCreated;
+import examples.console.example2.models.User;
+import examples.console.example2.models.UserId;
+import examples.console.example2.repositories.UserRepository;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import static everstore.java.serialization.Serializers.defaultSerializer;
 import static everstore.java.snapshot.events.SnapshotManagers.defaultEventsFactory;
+import static java.util.Collections.singletonList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 public class App {
 
-    private final Adapter adapter;
-
-    private App(Adapter adapter) {
-        this.adapter = adapter;
-    }
-
+    /**
+     * Entry-point for the application
+     *
+     * @param args
+     * @throws IOException
+     */
     public static void main(String[] args) throws IOException {
         // Configure the adapter
         final Path rootPath = Paths.get("target");
@@ -50,16 +56,34 @@ public class App {
         adapter.close();
     }
 
+    private final Adapter adapter;
+    private final UserRepository userRepository;
+
+    private App(Adapter adapter) {
+        this.adapter = adapter;
+        this.userRepository = new UserRepository(adapter, 1000);
+    }
+
     private void run() {
         try {
             // Setup a user - just so that we have some data for our example
             setupUser(new UserId(123));
 
-            // Try to get a user
-            final CompletableFuture<User> futureUser = findUser(new UserId(123));
+            // Get the user and display the result
+            findAndDisplayUser();
 
-            final User user = futureUser.get();
-            System.out.println(user);
+            // Add new events
+            CompletableFuture<CommitResult> commitResult =
+                    userRepository.saveEvents(new UserId(123), singletonList(new NameUpdated("John", "Doe")));
+            try {
+                commitResult.get();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            // Get the user again, but with new events available
+            findAndDisplayUser();
+
         } catch (ExecutionException e) {
             // Exception thrown if future completed exceptionally
             e.printStackTrace();
@@ -69,34 +93,26 @@ public class App {
 
     }
 
-    private CompletableFuture<User> findUser(UserId userId) {
-        final CompletableFuture<Transaction> transaction =
-                adapter.openTransaction("/java/example2/user-" + userId.value);
-        return transaction.thenCompose(Transaction::read)
-                .thenApplyAsync(this::loadUserFromEvents);
+    private void findAndDisplayUser() throws InterruptedException, ExecutionException {
+        final CompletableFuture<User> futureUser = userRepository.findUser(new UserId(123));
+        final User user = futureUser.get();
+        System.out.println(user);
     }
 
-    private User loadUserFromEvents(List<Object> events) {
-        User user = null;
-        for (Object event : events) {
-            if (event instanceof UserCreated) {
-                final UserCreated uc = (UserCreated) event;
-                user = new User(new UserId(uc.userId), uc.firstName + " " + uc.lastName);
-            }
-        }
-        return user;
-    }
-
+    /**
+     * Setup test data used by this example
+     *
+     * @param userId
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
     private void setupUser(UserId userId) throws ExecutionException, InterruptedException {
         final String name = "/java/example2/user-" + userId.value;
 
         final CompletableFuture<Boolean> journalExists = adapter.journalExists(name);
         if (!journalExists.get()) {
-            final CompletableFuture<Transaction> transaction = adapter.openTransaction(name);
-            final CompletableFuture<CommitResult> result = transaction.thenCompose(t -> {
-                t.add(new UserCreated(userId.value, "Per", "Andersson"));
-                return t.commit();
-            });
+            final CompletableFuture<CommitResult> result = userRepository.saveEvents(userId,
+                    singletonList(new UserCreated(userId.value, "Per", "Andersson")));
 
             try {
                 result.get();

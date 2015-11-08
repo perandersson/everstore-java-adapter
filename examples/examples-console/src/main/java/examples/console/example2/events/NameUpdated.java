@@ -1,21 +1,15 @@
 package examples.console.example2.events;
 
-public final class UserCreated implements UserEvent {
-    public final long userId;
+public class NameUpdated implements UserEvent {
     public final String firstName;
     public final String lastName;
 
-    /**
-     * Constructor used by the serialization mechanism. Default values is set here
-     */
-    protected UserCreated() {
-        userId = 0;
+    public NameUpdated() {
         firstName = "";
         lastName = "";
     }
 
-    public UserCreated(long userId, String firstName, String lastName) {
-        this.userId = userId;
+    public NameUpdated(String firstName, String lastName) {
         this.firstName = firstName;
         this.lastName = lastName;
     }
@@ -25,9 +19,8 @@ public final class UserCreated implements UserEvent {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        UserCreated that = (UserCreated) o;
+        NameUpdated that = (NameUpdated) o;
 
-        if (userId != that.userId) return false;
         if (!firstName.equals(that.firstName)) return false;
         return lastName.equals(that.lastName);
 
@@ -35,17 +28,15 @@ public final class UserCreated implements UserEvent {
 
     @Override
     public int hashCode() {
-        int result = (int) (userId ^ (userId >>> 32));
-        result = 31 * result + firstName.hashCode();
+        int result = firstName.hashCode();
         result = 31 * result + lastName.hashCode();
         return result;
     }
 
     @Override
     public String toString() {
-        return "UserCreated{" +
-                "userId=" + userId +
-                ", firstName='" + firstName + '\'' +
+        return "NameUpdated{" +
+                "firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 '}';
     }

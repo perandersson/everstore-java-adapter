@@ -1,6 +1,6 @@
 package everstore.api;
 
-public final class JournalSize {
+public final class JournalSize implements Comparable<JournalSize> {
     public final int value;
 
     protected JournalSize() {
@@ -27,6 +27,8 @@ public final class JournalSize {
         return value - rhs.value;
     }
 
+    public JournalSize add(JournalSize rhs) { return new JournalSize(value + rhs.value); }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -36,6 +38,11 @@ public final class JournalSize {
 
         return value == that.value;
 
+    }
+
+    @Override
+    public int compareTo(final JournalSize rhs) {
+        return value - rhs.value;
     }
 
     @Override

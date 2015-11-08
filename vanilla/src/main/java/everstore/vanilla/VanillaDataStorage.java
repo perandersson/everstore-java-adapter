@@ -1,7 +1,7 @@
 package everstore.vanilla;
 
 import everstore.api.CommitResult;
-import everstore.api.Offset;
+import everstore.api.JournalSize;
 import everstore.api.Transaction;
 import everstore.api.serialization.Serializer;
 import everstore.api.snapshot.EventsSnapshotConfig;
@@ -57,7 +57,7 @@ public class VanillaDataStorage implements DataStorage {
     }
 
     @Override
-    public CompletableFuture<List<Object>> readEventsFromJournal(final Transaction transaction, final Offset offset) {
+    public CompletableFuture<List<Object>> readEventsFromJournal(final Transaction transaction, final JournalSize offset) {
         return sender.readEventsFromJournal((VanillaTransaction) transaction, offset);
     }
 

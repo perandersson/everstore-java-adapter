@@ -1,7 +1,7 @@
 package everstore.api.storage;
 
 import everstore.api.CommitResult;
-import everstore.api.Offset;
+import everstore.api.JournalSize;
 import everstore.api.Transaction;
 
 import java.util.List;
@@ -11,7 +11,7 @@ public interface DataStorage {
 
     CompletableFuture<Transaction> openTransaction(String name);
 
-    CompletableFuture<List<Object>> readEventsFromJournal(Transaction transaction, Offset offset);
+    CompletableFuture<List<Object>> readEventsFromJournal(Transaction transaction, JournalSize offset);
 
     CompletableFuture<CommitResult> commitEvents(Transaction transaction, List<Object> events);
 

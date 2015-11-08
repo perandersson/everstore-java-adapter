@@ -1,7 +1,7 @@
 package everstore.vanilla;
 
 import everstore.api.CommitResult;
-import everstore.api.Offset;
+import everstore.api.JournalSize;
 import everstore.api.Transaction;
 import everstore.api.exception.*;
 import everstore.api.serialization.Serializer;
@@ -21,10 +21,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
 
 import static everstore.api.validation.Validation.require;
-import static java.util.Collections.EMPTY_LIST;
 
 public class VanillaDataStorageSender implements Runnable {
 
@@ -206,7 +204,7 @@ public class VanillaDataStorageSender implements Runnable {
         return existsResult;
     }
 
-    public CompletableFuture<List<Object>> readEventsFromJournal(final VanillaTransaction transaction, Offset offset) {
+    public CompletableFuture<List<Object>> readEventsFromJournal(final VanillaTransaction transaction, JournalSize offset) {
         final DataStoreRequest request = ReadJournalRequest.create(transaction.name, offset, transaction.size(),
                 nextRequestUID(), transaction.workerUID);
         final CompletableFuture<List<Object>> readResult = new CompletableFuture<>();

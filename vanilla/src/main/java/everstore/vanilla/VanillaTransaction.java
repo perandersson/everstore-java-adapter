@@ -2,14 +2,13 @@ package everstore.vanilla;
 
 import everstore.api.CommitResult;
 import everstore.api.JournalSize;
-import everstore.api.Offset;
 import everstore.api.Transaction;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-import static everstore.api.Offset.ZERO;
+import static everstore.api.JournalSize.ZERO;
 
 public class VanillaTransaction implements Transaction {
     public final String name;
@@ -41,7 +40,7 @@ public class VanillaTransaction implements Transaction {
     }
 
     @Override
-    public CompletableFuture<List<Object>> readFromOffset(Offset offset) {
+    public CompletableFuture<List<Object>> readFromOffset(JournalSize offset) {
         return dataStorage.readEventsFromJournal(this, offset);
     }
 
