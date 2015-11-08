@@ -36,18 +36,20 @@ public final class LittleEndianAwareInputStream implements EndianAwareInputStrea
 
     @Override
     public void read(int length, IntrusiveByteArrayOutputStream byteStream) throws IOException {
-        byteStream.ensureCapacity(byteStream.count + length);
+        if (length > 0) {
+            byteStream.ensureCapacity(byteStream.count + length);
 
-        int n = stream.read(byteStream.buffer, byteStream.count, length);
-        if (n == -1) throw new IOException("Could not read data from stream");
+            int n = stream.read(byteStream.buffer, byteStream.count, length);
+            if (n == -1) throw new IOException("Could not read data from stream");
 
-        while (n < length) {
-            int t = stream.read(byteStream.buffer, byteStream.count + n, length - n);
-            if (t == -1) throw new IOException("Could not read data from stream");
-            n += t;
+            while (n < length) {
+                int t = stream.read(byteStream.buffer, byteStream.count + n, length - n);
+                if (t == -1) throw new IOException("Could not read data from stream");
+                n += t;
+            }
+
+            // TODO: *puke*
+            byteStream.count += n;
         }
-
-        // TODO: *puke*
-        byteStream.count += n;
     }
 }
