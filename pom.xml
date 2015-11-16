@@ -17,6 +17,7 @@
         <module>vanilla</module>
         <module>java8-adapter</module>
         <module>examples/examples-console</module>
+        <module>examples/example-grizzly-rest</module>
     </modules>
 
     <licenses>

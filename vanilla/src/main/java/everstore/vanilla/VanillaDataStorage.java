@@ -48,7 +48,7 @@ public class VanillaDataStorage implements DataStorage {
         this.password = password;
         this.name = name;
         this.serializer = serializer;
-        this.snapshotManager = eventsSnapshotConfig.map(c -> c.eventsSnapshotManagerFactory.create(c));
+        this.snapshotManager = eventsSnapshotConfig.map(c -> c.factory.create(c));
     }
 
     @Override
