@@ -72,37 +72,37 @@ public class FinancialYearRepository {
         }).exceptionally(e -> response.resume(status(INTERNAL_SERVER_ERROR).entity(e).build()));
     }
 
-    @POST
-    @Consumes(APPLICATION_JSON)
-    @ManagedAsync
-    public void addFinancialYears(@Suspended final AsyncResponse response,
-                                  @HeaderParam("orgId") final int id,
-                                  final FinancialYearCandidate candidate) {
-        response.setTimeout(1000, MILLISECONDS);
-
-        final OrgId orgId = new OrgId(id);
-        final OrgStatefulRepository repository = orgRepository.get(orgId);
-        CompletableFuture<CommitResult> commitResult =
-                repository.saveEvents(new FinancialYearAdded(repository.getNextFinancialYearId(),
-                        candidate.startDate, candidate.endDate));
-
-        commitResult.thenApplyAsync((result) -> {
-            if (result.success) {
-                return
-            } else {
-                return
-            }
-        }).exceptionally(e -> response.resume(status(INTERNAL_SERVER_ERROR).entity(e).build()));
-
-
-        final CompletableFuture<Organization> futureUser = orgRepository.findUser(orgId);
-
-        futureUser.thenApplyAsync(org -> {
-            if (org == null) {
-                return response.resume(status(NOT_FOUND).build());
-            } else {
-                return response.resume(org.financialYears);
-            }
-        }).exceptionally(e -> response.resume(status(INTERNAL_SERVER_ERROR).entity(e).build()));
-    }
+//    @POST
+//    @Consumes(APPLICATION_JSON)
+//    @ManagedAsync
+//    public void addFinancialYears(@Suspended final AsyncResponse response,
+//                                  @HeaderParam("orgId") final int id,
+//                                  final FinancialYearCandidate candidate) {
+//        response.setTimeout(1000, MILLISECONDS);
+//
+//        final OrgId orgId = new OrgId(id);
+//        final OrgStatefulRepository repository = orgRepository.get(orgId);
+//        CompletableFuture<CommitResult> commitResult =
+//                repository.saveEvents(new FinancialYearAdded(repository.getNextFinancialYearId(),
+//                        candidate.startDate, candidate.endDate));
+//
+//        commitResult.thenApplyAsync((result) -> {
+//            if (result.success) {
+//                return
+//            } else {
+//                return
+//            }
+//        }).exceptionally(e -> response.resume(status(INTERNAL_SERVER_ERROR).entity(e).build()));
+//
+//
+//        final CompletableFuture<Organization> futureUser = orgRepository.findUser(orgId);
+//
+//        futureUser.thenApplyAsync(org -> {
+//            if (org == null) {
+//                return response.resume(status(NOT_FOUND).build());
+//            } else {
+//                return response.resume(org.financialYears);
+//            }
+//        }).exceptionally(e -> response.resume(status(INTERNAL_SERVER_ERROR).entity(e).build()));
+//    }
 }
