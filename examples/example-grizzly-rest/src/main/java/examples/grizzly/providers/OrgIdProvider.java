@@ -18,6 +18,9 @@ import java.lang.reflect.Type;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 
+/**
+ * Enable support reading and writing OrgId object as JSON
+ */
 @Provider
 @Consumes(APPLICATION_JSON)
 @Produces(APPLICATION_JSON)

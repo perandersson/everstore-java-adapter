@@ -1,13 +1,20 @@
 package examples.grizzly.models;
 
-public final class OrgId implements Comparable<OrgId> {
-    public final long value;
+import javax.validation.constraints.NotNull;
+import java.util.UUID;
 
-    protected OrgId() {
-        value = 0;
+import static everstore.api.validation.Validation.require;
+import static java.util.UUID.randomUUID;
+
+public final class OrgId implements Comparable<OrgId> {
+    public final UUID value;
+
+    public OrgId() {
+        value = randomUUID();
     }
 
-    public OrgId(long value) {
+    public OrgId(@NotNull UUID value) {
+        require(value != null, "Organization ID must be set");
         this.value = value;
     }
 
@@ -18,13 +25,13 @@ public final class OrgId implements Comparable<OrgId> {
 
         OrgId orgId = (OrgId) o;
 
-        return value == orgId.value;
+        return value.equals(orgId.value);
 
     }
 
     @Override
     public int hashCode() {
-        return (int) (value ^ (value >>> 32));
+        return value.hashCode();
     }
 
     @Override
@@ -36,10 +43,10 @@ public final class OrgId implements Comparable<OrgId> {
 
     @Override
     public int compareTo(final OrgId rhs) {
-        if (value > rhs.value)
-            return -1;
-        if (value < rhs.value)
-            return 1;
-        return 0;
+        return value.compareTo(rhs.value);
+    }
+
+    public static OrgId fromString(String s) {
+        return new OrgId(UUID.fromString(s));
     }
 }

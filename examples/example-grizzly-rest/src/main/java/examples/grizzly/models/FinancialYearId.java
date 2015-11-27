@@ -1,13 +1,20 @@
 package examples.grizzly.models;
 
-public final class FinancialYearId implements Comparable<FinancialYearId> {
-    public final long value;
+import javax.validation.constraints.NotNull;
+import java.util.UUID;
 
-    protected FinancialYearId() {
-        value = 0;
+import static everstore.api.validation.Validation.require;
+import static java.util.UUID.randomUUID;
+
+public final class FinancialYearId implements Comparable<FinancialYearId> {
+    public final UUID value;
+
+    public FinancialYearId() {
+        value = randomUUID();
     }
 
-    public FinancialYearId(long value) {
+    public FinancialYearId(@NotNull UUID value) {
+        require(value != null, "You must supply a valid financial year ID");
         this.value = value;
     }
 
@@ -18,13 +25,13 @@ public final class FinancialYearId implements Comparable<FinancialYearId> {
 
         FinancialYearId that = (FinancialYearId) o;
 
-        return value == that.value;
+        return value.equals(that.value);
 
     }
 
     @Override
     public int hashCode() {
-        return (int) (value ^ (value >>> 32));
+        return value.hashCode();
     }
 
     @Override
@@ -36,12 +43,12 @@ public final class FinancialYearId implements Comparable<FinancialYearId> {
 
     @Override
     public int compareTo(final FinancialYearId rhs) {
-        if (value > rhs.value)
-            return -1;
-        if (value < rhs.value)
-            return 1;
-        return 0;
+        return value.compareTo(rhs.value);
     }
 
-    public static final FinancialYearId ZERO = new FinancialYearId(0);
+    public static FinancialYearId fromString(String id) {
+        return new FinancialYearId(UUID.fromString(id));
+    }
+
+    public static final FinancialYearId ZERO = new FinancialYearId();
 }

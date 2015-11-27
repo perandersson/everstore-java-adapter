@@ -1,5 +1,6 @@
 package examples.grizzly.models;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -26,5 +27,16 @@ public class FinancialYears extends ArrayList<FinancialYear> {
             }
         }
         return empty();
+    }
+
+    public boolean overlapps(final LocalDate startDate, final LocalDate endDate) {
+        final Optional<FinancialYear> potentialConflict = findOverlapped(startDate, endDate);
+        return potentialConflict.isPresent();
+    }
+
+    public Optional<FinancialYear> findOverlapped(LocalDate startDate, LocalDate endDate) {
+        return stream()
+                .filter(f -> f.overlapps(startDate, endDate))
+                .findFirst();
     }
 }

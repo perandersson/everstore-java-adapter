@@ -12,4 +12,8 @@ public final class FinancialYear {
         this.startDate = startDate;
         this.endDate = endDate;
     }
+
+    public boolean overlapps(LocalDate startDate, LocalDate endDate) {
+        return false; // TODO: Add validation
+    }
 }

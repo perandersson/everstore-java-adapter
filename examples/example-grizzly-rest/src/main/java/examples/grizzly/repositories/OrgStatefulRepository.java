@@ -1,17 +1,19 @@
 package examples.grizzly.repositories;
 
 import everstore.api.Adapter;
+import everstore.api.Transaction;
 import examples.grizzly.events.FinancialYearAdded;
 import examples.grizzly.events.OrganizationCreated;
-import examples.grizzly.models.*;
+import examples.grizzly.models.FinancialYear;
+import examples.grizzly.models.FinancialYears;
+import examples.grizzly.models.OrgId;
+import examples.grizzly.models.Organization;
+import rx.Observable;
 
-import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicLong;
+import static rx.Observable.from;
 
 public class OrgStatefulRepository extends StatefulRepository<Organization> {
     private final OrgId id;
-    private AtomicLong financialYearId = new AtomicLong(0);
 
     public OrgStatefulRepository(final Adapter adapter, final OrgId id) {
         super(adapter, "/java/grizzly/org-" + id.value);
@@ -23,8 +25,8 @@ public class OrgStatefulRepository extends StatefulRepository<Organization> {
      *
      * @return A potential user
      */
-    public CompletableFuture<Organization> findUser() {
-        return findState();
+    public Observable<Organization> findOrg(final Transaction transaction) {
+        return from(findState(transaction));
     }
 
     @Override
@@ -38,14 +40,5 @@ public class OrgStatefulRepository extends StatefulRepository<Organization> {
         }
 
         throw new IllegalArgumentException("Supplied event: " + event + " is not handled");
-    }
-
-    /**
-     * Retrieves the next available financial year id
-     *
-     * @return
-     */
-    public FinancialYearId getNextFinancialYearId() {
-        return new FinancialYearId(financialYearId.incrementAndGet());
     }
 }

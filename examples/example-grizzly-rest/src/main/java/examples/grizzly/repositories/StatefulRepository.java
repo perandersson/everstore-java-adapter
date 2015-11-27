@@ -4,6 +4,7 @@ import everstore.api.Adapter;
 import everstore.api.CommitResult;
 import everstore.api.JournalSize;
 import everstore.api.Transaction;
+import rx.Observable;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -11,9 +12,12 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Collections.singletonList;
 import static java.util.concurrent.CompletableFuture.completedFuture;
+import static rx.Observable.from;
 
 /**
- * @param <T>
+ * Implement this class if you want to make us of a stateful repository for your event-sourced model
+ *
+ * @param <T> Type of the state this repository is managing
  */
 public abstract class StatefulRepository<T> {
     protected final Adapter adapter;
@@ -27,6 +31,13 @@ public abstract class StatefulRepository<T> {
             this.object = object;
             this.journalSize = journalSize;
         }
+
+        /**
+         * @return TRUE if this state is newer then the supplied state; FALSE otherwise
+         */
+        public boolean isNewerThen(State rhs) {
+            return journalSize.isLargerThan(rhs.journalSize);
+        }
     }
 
     // State is not initialized
@@ -37,35 +48,37 @@ public abstract class StatefulRepository<T> {
         this.journalName = journalName;
     }
 
-    protected CompletableFuture<Transaction> openTransaction() {
-        return adapter.openTransaction(journalName);
+    /**
+     * Open a new transaction to this repositories journal
+     *
+     * @return A transaction
+     */
+    public Observable<Transaction> openTransaction() {
+        return from(adapter.openTransaction(journalName));
     }
 
-    protected CompletableFuture<T> findState() {
+    protected CompletableFuture<T> findState(Transaction transaction) {
         if (state.get() == null) {
-            final CompletableFuture<State> futureState = initializeState();
+            final CompletableFuture<State> futureState = initializeState(transaction);
             return futureState.thenComposeAsync(state -> completedFuture(state.object));
         } else {
-            final CompletableFuture<Transaction> transaction = openTransaction();
             final CompletableFuture<List<Object>> read =
-                    transaction.thenCompose(t -> t.readFromOffset(new JournalSize(getSafeState().journalSize.value)));
+                    transaction.readFromOffset(new JournalSize(getSafeState().journalSize.value));
             return readAndParseEvents(transaction, read).thenComposeAsync(state -> completedFuture(state.object));
         }
     }
 
 
-    private CompletableFuture<State> initializeState() {
-        final CompletableFuture<Transaction> transaction = openTransaction();
-        final CompletableFuture<List<Object>> read = transaction.thenComposeAsync(Transaction::read);
+    private CompletableFuture<State> initializeState(Transaction transaction) {
+        final CompletableFuture<List<Object>> read = transaction.read();
         return readAndParseEvents(transaction, read);
     }
 
-    private CompletableFuture<State> readAndParseEvents(CompletableFuture<Transaction> transaction,
+    private CompletableFuture<State> readAndParseEvents(Transaction transaction,
                                                         CompletableFuture<List<Object>> read) {
         return read.thenComposeAsync(readResult -> {
             try {
-                final Transaction t = transaction.get();
-                final State newState = parseEvents(readResult, t.size());
+                final State newState = parseEvents(readResult, transaction.size());
                 saveState(newState);
                 return completedFuture(newState);
             } catch (Exception e) {
@@ -80,8 +93,8 @@ public abstract class StatefulRepository<T> {
      * @param newState The new state
      */
     private synchronized void saveState(State newState) {
-        State ref = getSafeState();
-        if (newState.journalSize.isLargerThan(ref.journalSize)) {
+        final State ref = getSafeState();
+        if (newState.isNewerThen(ref)) {
             state.set(newState);
         }
     }
@@ -122,6 +135,16 @@ public abstract class StatefulRepository<T> {
      * @return
      */
     public CompletableFuture<CommitResult> saveEvents(Object... events) {
+        return saveEvents(singletonList(events));
+    }
+
+    /**
+     * Save the supplied events and commit the transaction
+     *
+     * @param events The new events
+     * @return
+     */
+    public CompletableFuture<CommitResult> saveEvents(CompletableFuture<Transaction> transaction, Object... events) {
         return saveEvents(singletonList(events));
     }
 

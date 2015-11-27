@@ -1,7 +1,5 @@
 package examples.grizzly.models;
 
-import java.util.ArrayList;
-
 public final class Organization {
     public final OrgId id;
     public final String name;
