@@ -11,7 +11,7 @@ public interface EndianAwareOutputStream {
     /**
      * Close this input stream
      */
-    void close()  throws IOException;
+    void close() throws IOException;
 
     /**
      * Flush the output stream and send any cached data to the server

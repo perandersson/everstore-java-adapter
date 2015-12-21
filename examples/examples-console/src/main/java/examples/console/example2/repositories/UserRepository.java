@@ -17,7 +17,7 @@ public class UserRepository {
     public UserRepository(Adapter adapter, int maxStates) {
         this.adapter = adapter;
         this.repositories = Caffeine.newBuilder()
-                        .maximumSize(maxStates).<UserId, UserStatefulRepository>build();
+                .maximumSize(maxStates).<UserId, UserStatefulRepository>build();
     }
 
     public CompletableFuture<User> findUser(final UserId userId) {

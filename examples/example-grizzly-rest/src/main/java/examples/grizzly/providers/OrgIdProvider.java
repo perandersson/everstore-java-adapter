@@ -36,8 +36,7 @@ public class OrgIdProvider extends AbstractMessageReaderWriterProvider<OrgId> {
                           InputStream entityStream) throws IOException, WebApplicationException {
         final String value = readFromAsString(entityStream, APPLICATION_JSON_TYPE);
         if (value.length() > 0) {
-            Long id = Long.parseLong(value);
-            return new OrgId(id);
+            return OrgId.fromString(value);
         }
         return null;
     }
@@ -53,7 +52,7 @@ public class OrgIdProvider extends AbstractMessageReaderWriterProvider<OrgId> {
                         Annotation[] annotations, MediaType mediaType,
                         MultivaluedMap<String, Object> httpHeaders,
                         OutputStream entityStream) throws IOException, WebApplicationException {
-        String value = Long.toString(orgId.value);
+        String value = orgId.value.toString();
         writeToAsString(value, entityStream, APPLICATION_JSON_TYPE);
     }
 }

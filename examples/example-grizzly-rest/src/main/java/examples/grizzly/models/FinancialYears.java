@@ -1,10 +1,12 @@
 package examples.grizzly.models;
 
-import java.util.ArrayList;
-import java.util.Optional;
+import everstore.java.utils.Optional;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
+import java.util.ArrayList;
+
+import static everstore.java.utils.Optional.empty;
+import static everstore.java.utils.Optional.of;
+
 
 public class FinancialYears extends ArrayList<FinancialYear> {
 
@@ -17,7 +19,7 @@ public class FinancialYears extends ArrayList<FinancialYear> {
      * Find the financial year with the given id
      *
      * @param id The financial years id
-     * @return
+     * @return A potential financial year. Is empty if not found
      */
     public Optional<FinancialYear> findById(final FinancialYearId id) {
         for (FinancialYear financialYear : this) {

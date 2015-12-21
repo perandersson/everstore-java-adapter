@@ -1,51 +1,40 @@
 package examples.grizzly.repositories;
 
-import everstore.api.Adapter;
+import everstore.api.Transaction;
+import everstore.java.repositories.StatefulRepository;
+import everstore.java.repositories.StatefulTransactionalState;
+import everstore.java.utils.Optional;
 import examples.grizzly.events.FinancialYearAdded;
 import examples.grizzly.events.OrganizationCreated;
-import examples.grizzly.models.*;
+import examples.grizzly.models.FinancialYear;
+import examples.grizzly.models.FinancialYears;
+import examples.grizzly.models.OrgId;
+import examples.grizzly.models.Organization;
 
-import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicLong;
+public class OrgStatefulRepository extends StatefulTransactionalState<Organization, StatefulRepository<Organization>> {
+    public final OrgId orgId;
 
-public class OrgStatefulRepository extends StatefulRepository<Organization> {
-    private final OrgId id;
-    private AtomicLong financialYearId = new AtomicLong(0);
-
-    public OrgStatefulRepository(final Adapter adapter, final OrgId id) {
-        super(adapter, "/java/grizzly/org-" + id.value);
-        this.id = id;
+    public OrgStatefulRepository(final Transaction transaction,
+                                 final StatefulRepository<Organization> repository,
+                                 final OrgId orgId) {
+        super(transaction, repository);
+        this.orgId = orgId;
     }
 
-    /**
-     * Retrieve the user managed by this repository
-     *
-     * @return A potential user
-     */
-    public CompletableFuture<Organization> findUser() {
-        return findState();
+    public Optional<Organization> getOrg() {
+        return getState();
     }
 
     @Override
     protected Organization parseEvent(Organization state, Object event) {
         if (event instanceof OrganizationCreated) {
             final OrganizationCreated uc = (OrganizationCreated) event;
-            return new Organization(id, uc.name, new FinancialYears());
+            return new Organization(orgId, uc.name, new FinancialYears());
         } else if (event instanceof FinancialYearAdded) {
             final FinancialYearAdded fya = (FinancialYearAdded) event;
             return state.addFinancialYear(new FinancialYear(fya.id, fya.startDate, fya.endDate));
         }
 
         throw new IllegalArgumentException("Supplied event: " + event + " is not handled");
-    }
-
-    /**
-     * Retrieves the next available financial year id
-     *
-     * @return
-     */
-    public FinancialYearId getNextFinancialYearId() {
-        return new FinancialYearId(financialYearId.incrementAndGet());
     }
 }

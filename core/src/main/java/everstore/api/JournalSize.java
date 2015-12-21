@@ -27,7 +27,9 @@ public final class JournalSize implements Comparable<JournalSize> {
         return value - rhs.value;
     }
 
-    public JournalSize add(JournalSize rhs) { return new JournalSize(value + rhs.value); }
+    public JournalSize add(JournalSize rhs) {
+        return new JournalSize(value + rhs.value);
+    }
 
     @Override
     public boolean equals(Object o) {

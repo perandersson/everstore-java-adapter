@@ -1,13 +1,15 @@
 package examples.grizzly.models;
 
-public final class FinancialYearId implements Comparable<FinancialYearId> {
-    public final long value;
+import java.util.UUID;
 
-    protected FinancialYearId() {
-        value = 0;
+public final class FinancialYearId implements Comparable<FinancialYearId> {
+    public final UUID value;
+
+    public FinancialYearId() {
+        value = UUID.randomUUID();
     }
 
-    public FinancialYearId(long value) {
+    public FinancialYearId(UUID value) {
         this.value = value;
     }
 
@@ -18,13 +20,13 @@ public final class FinancialYearId implements Comparable<FinancialYearId> {
 
         FinancialYearId that = (FinancialYearId) o;
 
-        return value == that.value;
+        return value.equals(that.value);
 
     }
 
     @Override
     public int hashCode() {
-        return (int) (value ^ (value >>> 32));
+        return value.hashCode();
     }
 
     @Override
@@ -34,14 +36,12 @@ public final class FinancialYearId implements Comparable<FinancialYearId> {
                 '}';
     }
 
-    @Override
-    public int compareTo(final FinancialYearId rhs) {
-        if (value > rhs.value)
-            return -1;
-        if (value < rhs.value)
-            return 1;
-        return 0;
+    public static FinancialYearId fromString(String s) {
+        return new FinancialYearId(UUID.fromString(s));
     }
 
-    public static final FinancialYearId ZERO = new FinancialYearId(0);
+    @Override
+    public int compareTo(FinancialYearId o) {
+        return value.compareTo(o.value);
+    }
 }

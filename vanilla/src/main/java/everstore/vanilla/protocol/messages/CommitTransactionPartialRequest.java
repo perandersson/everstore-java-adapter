@@ -1,7 +1,7 @@
 package everstore.vanilla.protocol.messages;
 
-import everstore.vanilla.TransactionUID;
 import everstore.vanilla.RequestUID;
+import everstore.vanilla.TransactionUID;
 import everstore.vanilla.WorkerUID;
 import everstore.vanilla.io.EndianAwareOutputStream;
 import everstore.vanilla.protocol.DataStoreRequest;

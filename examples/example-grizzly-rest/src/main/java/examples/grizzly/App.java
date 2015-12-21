@@ -7,7 +7,6 @@ import everstore.api.AdapterConfig;
 import everstore.api.snapshot.EventsSnapshotConfig;
 import everstore.vanilla.VanillaDataStorageFactory;
 import org.glassfish.grizzly.http.server.HttpServer;
-import org.glassfish.grizzly.http.server.ServerConfiguration;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 

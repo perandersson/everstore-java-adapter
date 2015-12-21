@@ -3,28 +3,26 @@ package examples.grizzly.repositories;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import everstore.api.Adapter;
-import everstore.api.CommitResult;
+import everstore.java.repositories.StatefulRepository;
+import everstore.java.utils.Optional;
 import examples.grizzly.models.OrgId;
 import examples.grizzly.models.Organization;
 
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
 public class OrgRepository {
     private final Adapter adapter;
-    private final Cache<OrgId, OrgStatefulRepository> repositories;
+    private final Cache<OrgId, StatefulRepository<Organization>> repositories;
 
     public OrgRepository(Adapter adapter, int maxStates) {
         this.adapter = adapter;
         this.repositories = Caffeine.newBuilder()
-                .maximumSize(maxStates).<OrgId, OrgStatefulRepository>build();
+                .maximumSize(maxStates).<OrgId, StatefulRepository<Organization>>build();
     }
 
-    public OrgStatefulRepository get(final OrgId orgId) {
-        return repositories.get(orgId, id -> new OrgStatefulRepository(adapter, id));
-    }
+    public Optional<OrgStatefulRepository> get(final OrgId orgId) {
+        final String journalName = "/java/grizzly/org-" + orgId.value;
 
-    public CompletableFuture<Organization> findUser(final OrgId orgId) {
-        return get(orgId).findUser();
+        final StatefulRepository<Organization> repository =
+                repositories.get(orgId, id -> new StatefulRepository<>(adapter, journalName));
+        return repository.openTransaction().map(t -> new OrgStatefulRepository(t, repository, orgId));
     }
 }

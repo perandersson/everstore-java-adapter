@@ -1,7 +1,5 @@
 package examples.grizzly.models;
 
-import java.util.ArrayList;
-
 public final class Organization {
     public final OrgId id;
     public final String name;
@@ -16,8 +14,8 @@ public final class Organization {
     /**
      * Set the name and return the result as a new user instance
      *
-     * @param newName
-     * @return
+     * @param newName The new organization name
+     * @return A new organization instance.
      */
     public Organization setName(String newName) {
         return new Organization(id, newName, financialYears);
@@ -26,8 +24,8 @@ public final class Organization {
     /**
      * Add a financial year for the organization
      *
-     * @param financialYear
-     * @return
+     * @param financialYear The financial year we want to add
+     * @return A new organization instance.
      */
     public Organization addFinancialYear(FinancialYear financialYear) {
         final FinancialYears copy = financialYears.clone();

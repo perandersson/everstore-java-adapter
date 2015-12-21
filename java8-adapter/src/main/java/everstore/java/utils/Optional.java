@@ -34,7 +34,7 @@ public interface Optional<T> extends Serializable {
 
     <E extends Throwable> T orElseThrow(Supplier<? extends E> exceptionSupplier) throws E;
 
-    Optional<T>  exceptionally(Consumer<Throwable> exceptionOccurred);
+    Optional<T> exceptionally(Consumer<Throwable> exceptionOccurred);
 
     static <T, E extends Throwable> Optional<T> exceptionThrown(E exception) {
         return new ExceptionOptional<>(exception);
@@ -49,7 +49,7 @@ public interface Optional<T> extends Serializable {
     }
 
     static <T> Optional<T> of(CompletableFuture<T> fut) {
-        return new FutureOptional<T>(fut);
+        return new FutureOptional<>(fut);
     }
 
     static <T> Optional<T> ofNullable(T value) {

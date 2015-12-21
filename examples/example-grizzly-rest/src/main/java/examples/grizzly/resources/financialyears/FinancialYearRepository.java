@@ -1,108 +1,74 @@
 package examples.grizzly.resources.financialyears;
 
-import everstore.api.CommitResult;
-import examples.grizzly.events.FinancialYearAdded;
+import everstore.java.utils.Optional;
 import examples.grizzly.models.FinancialYear;
 import examples.grizzly.models.FinancialYearId;
+import examples.grizzly.models.FinancialYears;
 import examples.grizzly.models.OrgId;
-import examples.grizzly.models.Organization;
 import examples.grizzly.repositories.OrgRepository;
 import examples.grizzly.repositories.OrgStatefulRepository;
+import examples.grizzly.services.FinancialYearService;
 import org.glassfish.jersey.server.ManagedAsync;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.ws.rs.*;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
 
+import static examples.grizzly.rest.ResourceUtils.handleGet;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
-import static javax.ws.rs.core.Response.status;
 
 @Singleton
-@Path("/v1/financialyear")
+@Path("/v1/financialyears")
 @Produces(APPLICATION_JSON)
 public class FinancialYearRepository {
 
     private final OrgRepository orgRepository;
+    private final FinancialYearService financialYearService;
 
     @Inject
-    public FinancialYearRepository(OrgRepository orgRepository) {
+    public FinancialYearRepository(final OrgRepository orgRepository,
+                                   final FinancialYearService financialYearService) {
         this.orgRepository = orgRepository;
+        this.financialYearService = financialYearService;
     }
 
     @GET
     @ManagedAsync
     public void getFinancialYears(@Suspended AsyncResponse response,
-                                  @HeaderParam("orgId") int id) {
+                                  @HeaderParam("orgId") String id) {
         response.setTimeout(1000, MILLISECONDS);
+        final OrgId orgId = OrgId.fromString(id);
 
-        final OrgId orgId = new OrgId(id);
-        final CompletableFuture<Organization> futureOrg = orgRepository.findUser(orgId);
-
-        futureOrg.thenApplyAsync(org -> {
-            if (org == null) {
-                return response.resume(status(NOT_FOUND).build());
-            } else {
-                return response.resume(org.financialYears);
-            }
-        }).exceptionally(e -> response.resume(status(INTERNAL_SERVER_ERROR).entity(e).build()));
+        final Optional<OrgStatefulRepository> statefulRepository = orgRepository.get(orgId);
+        handleGet(response, statefulRepository.flatMap(repository -> {
+            final Optional<FinancialYears> financialYears = financialYearService.getFinancialYears(repository);
+            repository.close();
+            return financialYears;
+        }));
     }
 
     @GET
     @Path("/{id: \\d+}")
     @ManagedAsync
     public void getFinancialYear(@Suspended AsyncResponse response,
-                                 @HeaderParam("orgId") int id,
-                                 @PathParam("id") long financialYearId) {
-        final OrgId orgId = new OrgId(id);
-        final CompletableFuture<Organization> futureOrg = orgRepository.findUser(orgId);
+                                 @HeaderParam("orgId") String id,
+                                 @PathParam("id") String finYearId) {
+        response.setTimeout(1000, MILLISECONDS);
+        final OrgId orgId = OrgId.fromString(id);
+        final FinancialYearId financialYearId = FinancialYearId.fromString(finYearId);
 
-        futureOrg.thenApplyAsync(org -> {
-            final Optional<FinancialYear> financialYear =
-                    org.financialYears.findById(new FinancialYearId(financialYearId));
-            return financialYear.map(response::resume)
-                    .orElseGet(() -> response.resume(status(NOT_FOUND).build()));
-        }).exceptionally(e -> response.resume(status(INTERNAL_SERVER_ERROR).entity(e).build()));
+        final Optional<OrgStatefulRepository> statefulRepository = orgRepository.get(orgId);
+        handleGet(response, statefulRepository.flatMap(repository -> {
+            final Optional<FinancialYear> financialYear = financialYearService.findFinancialYear(repository, financialYearId);
+            repository.close();
+            return financialYear;
+        }));
     }
-
-//    @POST
-//    @Consumes(APPLICATION_JSON)
-//    @ManagedAsync
-//    public void addFinancialYears(@Suspended final AsyncResponse response,
-//                                  @HeaderParam("orgId") final int id,
-//                                  final FinancialYearCandidate candidate) {
-//        response.setTimeout(1000, MILLISECONDS);
-//
-//        final OrgId orgId = new OrgId(id);
-//        final OrgStatefulRepository repository = orgRepository.get(orgId);
-//        CompletableFuture<CommitResult> commitResult =
-//                repository.saveEvents(new FinancialYearAdded(repository.getNextFinancialYearId(),
-//                        candidate.startDate, candidate.endDate));
-//
-//        commitResult.thenApplyAsync((result) -> {
-//            if (result.success) {
-//                return
-//            } else {
-//                return
-//            }
-//        }).exceptionally(e -> response.resume(status(INTERNAL_SERVER_ERROR).entity(e).build()));
-//
-//
-//        final CompletableFuture<Organization> futureUser = orgRepository.findUser(orgId);
-//
-//        futureUser.thenApplyAsync(org -> {
-//            if (org == null) {
-//                return response.resume(status(NOT_FOUND).build());
-//            } else {
-//                return response.resume(org.financialYears);
-//            }
-//        }).exceptionally(e -> response.resume(status(INTERNAL_SERVER_ERROR).entity(e).build()));
-//    }
 }

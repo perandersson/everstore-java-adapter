@@ -12,7 +12,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
-import java.nio.file.*;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +26,12 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import static everstore.api.validation.Validation.require;
 import static java.nio.file.FileVisitResult.CONTINUE;
-import static java.nio.file.Files.*;
+import static java.nio.file.Files.createDirectories;
+import static java.nio.file.Files.createDirectory;
+import static java.nio.file.Files.createFile;
+import static java.nio.file.Files.deleteIfExists;
+import static java.nio.file.Files.isDirectory;
+import static java.nio.file.Files.walkFileTree;
 import static java.util.Optional.of;
 
 /**

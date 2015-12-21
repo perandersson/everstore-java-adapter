@@ -1,13 +1,15 @@
 package examples.grizzly.models;
 
-public final class OrgId implements Comparable<OrgId> {
-    public final long value;
+import java.util.UUID;
 
-    protected OrgId() {
-        value = 0;
+public final class OrgId implements Comparable<OrgId> {
+    public final UUID value;
+
+    public OrgId() {
+        value = UUID.randomUUID();
     }
 
-    public OrgId(long value) {
+    public OrgId(final UUID value) {
         this.value = value;
     }
 
@@ -18,13 +20,13 @@ public final class OrgId implements Comparable<OrgId> {
 
         OrgId orgId = (OrgId) o;
 
-        return value == orgId.value;
+        return value.equals(orgId.value);
 
     }
 
     @Override
     public int hashCode() {
-        return (int) (value ^ (value >>> 32));
+        return value.hashCode();
     }
 
     @Override
@@ -35,11 +37,11 @@ public final class OrgId implements Comparable<OrgId> {
     }
 
     @Override
-    public int compareTo(final OrgId rhs) {
-        if (value > rhs.value)
-            return -1;
-        if (value < rhs.value)
-            return 1;
-        return 0;
+    public int compareTo(OrgId o) {
+        return value.compareTo(o.value);
+    }
+
+    public static OrgId fromString(final String s) {
+        return new OrgId(UUID.fromString(s));
     }
 }

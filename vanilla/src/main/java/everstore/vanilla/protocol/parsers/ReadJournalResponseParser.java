@@ -1,7 +1,5 @@
 package everstore.vanilla.protocol.parsers;
 
-import everstore.api.JournalSize;
-import everstore.api.validation.Validation;
 import everstore.vanilla.Event;
 import everstore.vanilla.io.ByteArrayNewLineReader;
 import everstore.vanilla.io.EndianAwareInputStream;
@@ -12,11 +10,9 @@ import everstore.vanilla.protocol.messages.ReadJournalResponse;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static everstore.api.validation.Validation.require;
-import static java.util.Collections.EMPTY_LIST;
 import static java.util.Optional.empty;
 
 public final class ReadJournalResponseParser implements ResponseParser {
@@ -27,7 +23,7 @@ public final class ReadJournalResponseParser implements ResponseParser {
         public State(MessageResponse response, boolean complete, byte[] bytesLeft) {
             super(response, complete);
             this.bytesLeft = bytesLeft;
-            readJournalResponse = response != null ? (ReadJournalResponse)response : null;
+            readJournalResponse = response != null ? (ReadJournalResponse) response : null;
         }
     }
 
@@ -81,7 +77,7 @@ public final class ReadJournalResponseParser implements ResponseParser {
      *
      * @param bytes
      * @param length
-     * @param eof If this response contains an eof marker - i.e. last part of the multipart message
+     * @param eof    If this response contains an eof marker - i.e. last part of the multipart message
      * @return The resulting state
      */
     private ResponseState readJournal(byte[] bytes, int length, boolean eof) {

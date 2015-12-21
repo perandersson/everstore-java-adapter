@@ -1,6 +1,11 @@
 package everstore.vanilla;
 
-import everstore.vanilla.io.*;
+import everstore.vanilla.io.BigEndianAwareInputStream;
+import everstore.vanilla.io.BigEndianAwareOutputStream;
+import everstore.vanilla.io.EndianAwareInputStream;
+import everstore.vanilla.io.EndianAwareOutputStream;
+import everstore.vanilla.io.LittleEndianAwareInputStream;
+import everstore.vanilla.io.LittleEndianAwareOutputStream;
 
 import java.io.InputStream;
 import java.io.OutputStream;
