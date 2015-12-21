@@ -19,7 +19,7 @@ public class OrgRepository {
     }
 
     public Optional<OrgStatefulRepository> get(final OrgId orgId) {
-        final String journalName = "/java/grizzly/org-" + orgId.value;
+        final String journalName = "/java/grizzly/org/" + orgId.value;
 
         final StatefulRepository<Organization> repository =
                 repositories.get(orgId, id -> new StatefulRepository<>(adapter, journalName));
