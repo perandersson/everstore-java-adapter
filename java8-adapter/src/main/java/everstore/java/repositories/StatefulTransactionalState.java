@@ -80,6 +80,24 @@ public abstract class StatefulTransactionalState<T, R extends StatefulRepository
     }
 
     /**
+     * Add the supplied events without committing the transaction
+     *
+     * @param events The new events
+     */
+    public void addEvents(List<Object> events) {
+        events.forEach(transaction::add);
+    }
+
+    /**
+     * Add the supplied events without committing the transaction
+     *
+     * @param events The new events
+     */
+    public void addEvents(Object... events) {
+        addEvents(Arrays.asList(events));
+    }
+
+    /**
      * Save the supplied events and commit the transaction
      *
      * @param events The new events

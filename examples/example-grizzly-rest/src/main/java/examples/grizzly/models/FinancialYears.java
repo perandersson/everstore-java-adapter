@@ -2,6 +2,7 @@ package examples.grizzly.models;
 
 import everstore.java.utils.Optional;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 import static everstore.java.utils.Optional.empty;
@@ -27,6 +28,19 @@ public class FinancialYears extends ArrayList<FinancialYear> {
                 return of(financialYear);
             }
         }
+        return empty();
+    }
+
+    public Optional<FinancialYear> findOverlapping(final LocalDate startDate, final LocalDate endDate) {
+        for (final FinancialYear financialYear : this) {
+            if (startDate.isBefore(financialYear.startDate) && financialYear.endDate.isBefore(endDate)) {
+                return of(financialYear);
+            }
+            if (financialYear.startDate.equals(startDate) && financialYear.endDate.equals(endDate)) {
+                return of(financialYear);
+            }
+        }
+
         return empty();
     }
 }

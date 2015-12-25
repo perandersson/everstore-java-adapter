@@ -1,10 +1,12 @@
 package examples.grizzly;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
 import everstore.api.Adapter;
 import everstore.api.AdapterConfig;
 import everstore.api.snapshot.EventsSnapshotConfig;
+import everstore.java.serialization.jackson.LocalDateModule;
 import everstore.vanilla.VanillaDataStorageFactory;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
@@ -75,7 +77,10 @@ public class App {
 
         final ObjectMapper mapper = new ObjectMapper();
         JacksonJaxbJsonProvider jacksonProvider = new JacksonJaxbJsonProvider();
+        jacksonProvider.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         jacksonProvider.setMapper(mapper);
+
+        mapper.registerModule(new LocalDateModule());
         config.register(jacksonProvider);
 
         return config;

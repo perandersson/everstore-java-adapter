@@ -1,17 +1,18 @@
 package examples.grizzly.resources.organization;
 
+import everstore.api.CommitResult;
 import everstore.java.utils.Optional;
 import examples.grizzly.models.OrgId;
 import examples.grizzly.models.Organization;
 import examples.grizzly.repositories.OrgRepository;
 import examples.grizzly.repositories.OrgStatefulRepository;
+import examples.grizzly.repositories.factory.RepositoryParam;
 import examples.grizzly.services.OrgService;
 import org.glassfish.jersey.server.ManagedAsync;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -20,7 +21,7 @@ import javax.ws.rs.container.Suspended;
 
 import static examples.grizzly.rest.ResourceUtils.handleGet;
 import static examples.grizzly.rest.ResourceUtils.handlePost;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static examples.grizzly.rest.ResourceUtils.validateCommit;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Singleton
@@ -39,12 +40,8 @@ public class OrganizationResource {
 
     @GET
     @ManagedAsync
-    public void findOrg(@Suspended AsyncResponse response,
-                        @HeaderParam("orgId") String id) {
-        response.setTimeout(1000, MILLISECONDS);
-        final OrgId orgId = OrgId.fromString(id);
-
-        final Optional<OrgStatefulRepository> statefulRepository = orgRepository.get(orgId);
+    public void findOrg(@Suspended final AsyncResponse response,
+                        @RepositoryParam Optional<OrgStatefulRepository> statefulRepository) {
         handleGet(response, statefulRepository.flatMap(repository -> {
             Optional<Organization> potentialOrg = orgService.getOrg(repository);
             repository.close();
@@ -54,14 +51,17 @@ public class OrganizationResource {
 
     @POST
     @ManagedAsync
-    public void addOrg(@Suspended AsyncResponse response) {
-        response.setTimeout(1000, MILLISECONDS);
+    public void addOrg(@Suspended final AsyncResponse response) {
         final OrgId orgId = new OrgId();
-
         final Optional<OrgStatefulRepository> statefulRepository = orgRepository.get(orgId);
-        handlePost(response,
-                statefulRepository.flatMap(repository -> orgService.createOrg(repository, "Name here!!!")));
+        handlePost(response, statefulRepository.flatMap(repository -> {
+            return orgService.createOrg(repository, "Name here!!!").flatMap(org -> {
+                final Optional<CommitResult> commit = repository.commit();
+                return commit.<Organization>map(commitResult -> {
+                    validateCommit(commitResult, "Could not create organization");
+                    return org;
+                });
+            });
+        }));
     }
-
-
 }

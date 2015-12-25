@@ -7,7 +7,6 @@ import examples.grizzly.models.Organization;
 import examples.grizzly.repositories.OrgStatefulRepository;
 
 import static examples.grizzly.rest.ResourceUtils.conflicts;
-import static examples.grizzly.rest.ResourceUtils.validateCommit;
 
 public class OrgService {
 
@@ -16,13 +15,12 @@ public class OrgService {
     }
 
     public Optional<Organization> createOrg(final OrgStatefulRepository repository, final String name) {
-        return repository.getOrg().flatMap(potentialOrg -> {
+        return repository.getOrg().map(potentialOrg -> {
             conflicts(potentialOrg, "An organization with id: " + repository.orgId);
+
             final OrganizationCreated event = new OrganizationCreated("Name");
-            return repository.saveEvents(event).map(commitResult -> {
-                validateCommit(commitResult, "Could not create organization");
-                return new Organization(repository.orgId, name, new FinancialYears());
-            });
+            repository.addEvents(event);
+            return new Organization(repository.orgId, name, new FinancialYears());
         });
     }
 }

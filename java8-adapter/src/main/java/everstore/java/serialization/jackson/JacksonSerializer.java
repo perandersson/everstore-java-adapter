@@ -2,6 +2,7 @@ package everstore.java.serialization.jackson;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import everstore.api.exception.EverstoreSerializerFailed;
 import everstore.api.serialization.Serializer;
 
@@ -15,6 +16,11 @@ public class JacksonSerializer implements Serializer {
 
     private final ObjectMapper mapper = new ObjectMapper();
     private final ClassLoader classLoader = JacksonSerializer.class.getClassLoader();
+
+    public JacksonSerializer() {
+        mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        mapper.registerModule(new LocalDateModule());
+    }
 
     @Override
     public <T> String convertToString(T object) {
