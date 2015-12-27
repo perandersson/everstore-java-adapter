@@ -8,6 +8,7 @@ import everstore.api.AdapterConfig;
 import everstore.api.snapshot.EventsSnapshotConfig;
 import everstore.java.serialization.jackson.LocalDateModule;
 import everstore.vanilla.VanillaDataStorageFactory;
+import examples.grizzly.serialization.CustomModule;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -81,6 +82,7 @@ public class App {
         jacksonProvider.setMapper(mapper);
 
         mapper.registerModule(new LocalDateModule());
+        mapper.registerModule(new CustomModule());
         config.register(jacksonProvider);
 
         return config;

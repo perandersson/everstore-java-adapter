@@ -47,7 +47,7 @@ public final class ResourceUtils {
                 final ResourceException re = (ResourceException) e;
                 response.resume(status(re.status).entity(e).build());
             } else {
-                response.resume(status(INTERNAL_SERVER_ERROR).entity(e).build());
+                response.resume(status(INTERNAL_SERVER_ERROR).entity(new InternalServerErrorResponse(e.getMessage())).build());
             }
             e.printStackTrace();
         });
@@ -66,7 +66,7 @@ public final class ResourceUtils {
                 final ResourceException re = (ResourceException) e;
                 response.resume(status(re.status).entity(e).build());
             } else {
-                response.resume(status(INTERNAL_SERVER_ERROR).entity(e).build());
+                response.resume(status(INTERNAL_SERVER_ERROR).entity(new InternalServerErrorResponse(e.getMessage())).build());
             }
             e.printStackTrace();
         });
