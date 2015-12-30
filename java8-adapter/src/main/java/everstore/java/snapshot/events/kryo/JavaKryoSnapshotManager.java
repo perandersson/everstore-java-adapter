@@ -87,21 +87,7 @@ public class JavaKryoSnapshotManager implements EventsSnapshotManager {
         require(isDirectory(rootPath), "The root path must be a directory");
 
         // Clean up the snapshot directory is we want to
-        if (cleanOnInt) {
-            walkFileTree(rootPath, new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
-                    Files.delete(file);
-                    return CONTINUE;
-                }
-
-                @Override
-                public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                    Files.delete(dir);
-                    return CONTINUE;
-                }
-            });
-        } else {
+        if (!cleanOnInt) {
             walkFileTree(rootPath, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
