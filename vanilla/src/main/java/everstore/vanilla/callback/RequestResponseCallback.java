@@ -11,8 +11,8 @@ public final class RequestResponseCallback {
         this.failure = failure;
     }
 
-    public void fail() {
-        failure.failed();
+    public void fail(Exception exception) {
+        failure.failed(exception);
     }
 
     public void succeed(DataStoreResponse response) {

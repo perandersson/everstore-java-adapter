@@ -13,6 +13,8 @@ import everstore.vanilla.io.EndianAwareOutputStream;
 import everstore.vanilla.protocol.DataStoreRequest;
 import everstore.vanilla.protocol.DataStoreResponse;
 import everstore.vanilla.protocol.messages.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
@@ -25,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static everstore.api.validation.Validation.require;
 
 public class VanillaDataStorageSender implements Runnable {
+    private static final Logger log = LoggerFactory.getLogger(VanillaDataStorageSender.class);
 
     private final Thread thread;
     private final AtomicBoolean running = new AtomicBoolean(true);
@@ -78,9 +81,7 @@ public class VanillaDataStorageSender implements Runnable {
                         }
                     } catch (IOException e) {
                         final RequestResponseCallback callback = callbacks.removeAndGet(request.header.requestUID);
-                        // TODO: Replace this with a normal logging framework
-                        e.printStackTrace();
-                        callback.fail();
+                        callback.fail(e);
                         throw e;
                     }
                 }
@@ -137,7 +138,7 @@ public class VanillaDataStorageSender implements Runnable {
             final NewTransactionResponse response = (NewTransactionResponse) dsr.response;
             transaction.complete(new VanillaTransaction(dataStorage, name, response.journalSize, dsr.header.workerUID,
                     response.transactionUID));
-        }, () -> transaction.completeExceptionally(new OpenTransactionFailed(name)));
+        }, (e) -> transaction.completeExceptionally(new OpenTransactionFailed(name, e)));
 
         try {
             requests.put(request);
@@ -158,7 +159,7 @@ public class VanillaDataStorageSender implements Runnable {
                 commitResult.complete(new CommitResult(true, events, response.journalSize));
             else
                 commitResult.complete(new CommitResult(false, events, response.journalSize));
-        }, () -> commitResult.completeExceptionally(new CommitTransactionFailed(transaction.name)));
+        }, (e) -> commitResult.completeExceptionally(new CommitTransactionFailed(transaction.name, e)));
 
         try {
             requests.put(request);
@@ -176,7 +177,7 @@ public class VanillaDataStorageSender implements Runnable {
         callbacks.add(request.header.requestUID, dsr -> {
             final RollbackTransactionResponse response = (RollbackTransactionResponse) dsr.response;
             rollbackResult.complete(response.success);
-        }, () -> rollbackResult.completeExceptionally(new RollbackFailed(transaction.name)));
+        }, (e) -> rollbackResult.completeExceptionally(new RollbackFailed(transaction.name, e)));
 
         try {
             requests.put(request);
@@ -193,7 +194,7 @@ public class VanillaDataStorageSender implements Runnable {
         callbacks.add(request.header.requestUID, dsr -> {
             final JournalExistsResponse response = (JournalExistsResponse) dsr.response;
             existsResult.complete(response.exists);
-        }, () -> existsResult.completeExceptionally(new JournalExistsException(name)));
+        }, (e) -> existsResult.completeExceptionally(new JournalExistsException(name, e)));
 
         try {
             requests.put(request);
@@ -216,7 +217,7 @@ public class VanillaDataStorageSender implements Runnable {
                 result.add(serializer.convertFromString(event.data));
 
             readResult.complete(result);
-        }, () -> readResult.completeExceptionally(new ReadEventsFailed(transaction.name)));
+        }, (e) -> readResult.completeExceptionally(new ReadEventsFailed(transaction.name, e)));
 
         try {
             requests.put(request);
@@ -235,21 +236,21 @@ public class VanillaDataStorageSender implements Runnable {
         try {
             outputStream.close();
         } catch (IOException e) {
-            // TODO: Add logging, but ignore otherwise
+            log.error("Could not close the output stream attached to the socket", e);
         }
         failAllRequests();
     }
 
     private void failAllRequests() {
-        callbacks.removeAll().forEach(RequestResponseCallback::fail);
+        callbacks.removeAll().forEach(c -> c.fail(new ConnectionClosedException()));
     }
 
     public void start() {
         thread.start();
     }
 
-    private void uncaughtException(Throwable e) {
-        e.printStackTrace();
+    private void uncaughtException(final Throwable e) {
+        log.error("Unhandled exception in sender thread", e);
         close();
     }
 

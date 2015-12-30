@@ -12,6 +12,8 @@ import examples.grizzly.serialization.CustomModule;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
@@ -23,6 +25,7 @@ import static everstore.java.snapshot.events.SnapshotManagers.defaultFactory;
 import static java.util.Optional.of;
 
 public class App {
+    public static final Logger log = LoggerFactory.getLogger(App.class);
     private static final URI BASE_URI = URI.create("http://localhost:8080/");
 
     /**
@@ -37,7 +40,7 @@ public class App {
             server.start();
             Thread.currentThread().join();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.error("Interrupt failed", e);
         } finally {
             adapter.close();
         }

@@ -7,6 +7,8 @@ import everstore.vanilla.io.IntrusiveByteArrayOutputStream;
 import everstore.vanilla.protocol.DataStoreResponse;
 import everstore.vanilla.protocol.Header;
 import everstore.vanilla.protocol.parsers.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -16,6 +18,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static everstore.api.validation.Validation.require;
 
 public class VanillaDataStorageReceiver implements Runnable {
+    private static final Logger log = LoggerFactory.getLogger(VanillaDataStorageReceiver.class);
 
     private final Thread thread;
     private final AtomicBoolean running = new AtomicBoolean(true);
@@ -53,9 +56,8 @@ public class VanillaDataStorageReceiver implements Runnable {
                         responseParsers.put(header.requestUID.value, parser.create(state));
                     }
                 } catch (IOException e) {
-                    e.printStackTrace(); // TODO: Add better logging.
                     final RequestResponseCallback callback = callbacks.removeAndGet(header.requestUID);
-                    callback.fail();
+                    callback.fail(e);
                 }
             }
         } catch (Exception e) {
@@ -106,7 +108,7 @@ public class VanillaDataStorageReceiver implements Runnable {
         try {
             inputStream.close();
         } catch (IOException e) {
-            // TODO: Add logging, but ignore otherwise
+            log.error("Could not close input stream attached to the receiver", e);
         }
     }
 
@@ -115,9 +117,7 @@ public class VanillaDataStorageReceiver implements Runnable {
     }
 
     private void uncaughtException(Throwable e) {
-        if (running.get()) {
-            e.printStackTrace();
-        }
+        log.error("Unhandled exception in receiver thread", e);
         close();
     }
 }

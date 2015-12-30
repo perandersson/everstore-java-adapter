@@ -7,6 +7,8 @@ import everstore.api.JournalSize;
 import everstore.api.snapshot.EventsSnapshotEntry;
 import everstore.api.snapshot.EventsSnapshotManager;
 import everstore.api.snapshot.EverstoreIOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -28,6 +30,7 @@ import static java.util.Optional.of;
  * SnapshotManager that uses Kryo as framework for serialize and deserialize the supplied events.
  */
 public class JavaKryoSnapshotManager implements EventsSnapshotManager {
+    private final Logger log = LoggerFactory.getLogger(JavaKryoSnapshotManager.class);
     public final class SnapshotEntry {
         public final long memorySize;
         public final JournalSize journalSize;
@@ -121,7 +124,8 @@ public class JavaKryoSnapshotManager implements EventsSnapshotManager {
             createDirectories(fullPath.getParent());
             createFile(fullPath);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Could not create the necessary directories for path: " + fullPath, e);
+            // TODO: Decide what to do if it's not possible to create the full path to the snapshot file.
         }
     }
 
