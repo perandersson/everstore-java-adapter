@@ -1,14 +1,25 @@
 package everstore.api;
 
+import everstore.api.snapshot.EventsSnapshotConfig;
+import everstore.api.snapshot.EverstoreIOException;
 import everstore.api.storage.DataStorage;
 import everstore.api.storage.DataStorageFactory;
 
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static everstore.api.validation.Validation.require;
+import static java.nio.file.FileVisitResult.CONTINUE;
+import static java.nio.file.Files.createDirectory;
+import static java.nio.file.Files.isDirectory;
+import static java.nio.file.Files.walkFileTree;
 
 public class Adapter {
     /**
@@ -27,9 +38,48 @@ public class Adapter {
      * Connect this adapter to the server
      */
     public void connect() throws IOException {
+        preConnect();
+
         final DataStorageFactory factory = config.dataStorageFactory;
         for (int i = 0; i < config.numConnections; ++i) {
             storages.add(factory.create(config, Integer.toString(i)));
+        }
+    }
+
+    protected void preConnect() {
+        config.eventsSnapshotConfig.ifPresent(this::initSnapshotManager);
+    }
+
+    private void initSnapshotManager(final EventsSnapshotConfig snapshotConfig) {
+        try {
+            // Create directory if it doesn't exist
+            if (!Files.exists(snapshotConfig.path)) {
+                createDirectory(snapshotConfig.path);
+            }
+
+            // Ensure that the path is a directory
+            require(isDirectory(snapshotConfig.path), "Everstore snapshot path must be a directory");
+
+            // Clean up the snapshot directory if requested
+            if (snapshotConfig.cleanOnInt) {
+                walkFileTree(snapshotConfig.path, new SimpleFileVisitor<Path>() {
+                    @Override
+                    public FileVisitResult visitFile(Path file, BasicFileAttributes attributes) throws IOException {
+                        Files.delete(file);
+                        return CONTINUE;
+                    }
+
+                    @Override
+                    public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                        if (!dir.equals(snapshotConfig.path)) {
+                            Files.delete(dir);
+                        }
+                        return CONTINUE;
+                    }
+                });
+            }
+        } catch (IOException e) {
+            throw new EverstoreIOException("Could not initialize the everstore snapshot directory", e);
         }
     }
 

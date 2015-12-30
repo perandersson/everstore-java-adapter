@@ -9,7 +9,7 @@ import static everstore.java.utils.Optional.empty;
 import static everstore.java.utils.Optional.of;
 
 
-public class FinancialYears extends ArrayList<FinancialYear> {
+public final class FinancialYears extends ArrayList<FinancialYear> {
 
     @Override
     public FinancialYears clone() {

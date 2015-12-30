@@ -51,7 +51,7 @@ public class App {
      */
     private static Adapter createAdapter() throws IOException {
         // Configure the adapter
-        final Path rootPath = Paths.get("target");
+        final Path rootPath = Paths.get("snapshotdir");
         final EventsSnapshotConfig snapshotConfig = new EventsSnapshotConfig(rootPath, defaultFactory());
         final AdapterConfig adapterConfig = new AdapterConfig("admin", "passwd",
                 "localhost", (short) 6929, 6, 2000, 65526,
