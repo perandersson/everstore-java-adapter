@@ -46,8 +46,8 @@ public final class ResourceUtils {
                 response.resume(status(re.status).entity(e).build());
             } else {
                 response.resume(status(INTERNAL_SERVER_ERROR).entity(new InternalServerErrorResponse(e.getMessage())).build());
+                e.printStackTrace();
             }
-            e.printStackTrace();
         });
     }
 
