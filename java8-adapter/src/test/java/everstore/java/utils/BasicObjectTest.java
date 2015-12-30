@@ -5,9 +5,7 @@ import org.junit.Test;
 import java.util.function.Supplier;
 
 import static everstore.java.utils.Optional.empty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class BasicObjectTest {
 

@@ -19,9 +19,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 
-import static examples.grizzly.rest.ResourceUtils.handleGet;
-import static examples.grizzly.rest.ResourceUtils.handlePost;
-import static examples.grizzly.rest.ResourceUtils.validateCommit;
+import static examples.grizzly.rest.ResourceUtils.*;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Singleton

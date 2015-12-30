@@ -6,9 +6,7 @@ import everstore.java.utils.Optional;
 import javax.ws.rs.container.AsyncResponse;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static javax.ws.rs.core.Response.Status.CONFLICT;
-import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
+import static javax.ws.rs.core.Response.Status.*;
 import static javax.ws.rs.core.Response.status;
 
 public final class ResourceUtils {

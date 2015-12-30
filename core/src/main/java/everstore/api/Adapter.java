@@ -17,9 +17,7 @@ import java.util.concurrent.CompletableFuture;
 
 import static everstore.api.validation.Validation.require;
 import static java.nio.file.FileVisitResult.CONTINUE;
-import static java.nio.file.Files.createDirectory;
-import static java.nio.file.Files.isDirectory;
-import static java.nio.file.Files.walkFileTree;
+import static java.nio.file.Files.*;
 
 public class Adapter {
     /**
