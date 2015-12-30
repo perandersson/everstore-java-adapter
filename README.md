@@ -16,12 +16,13 @@ This is the java8 specific adapter. Instanciate the core adapter using configura
 
 ## Examples
 
-### Example1
+### example-console
 
 This is a simple console application where we try to save the same type of event to the same journal at the same time. 
 This shows us what happens when a conflict happens. The example itself do not try to resolve the conflict.
 
-### Example2
+### example-grizzly-rest
 
-A more practical example on how to use Eventsourcing. This example initializes a journal with a basic event, which is 
-later used to recreate the state of our data.
+Example where we start a simple a simple REST HTTP server using Grizzly and Jersey2. This example makes full use of the
+custom `Optional<T>` type that exists in this project. The reason for it is that all requests are handled asynchronously
+and the interface `CompletableFuture<T>` is simply not good enough.
