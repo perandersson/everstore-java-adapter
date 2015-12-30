@@ -11,7 +11,6 @@ import everstore.vanilla.callback.RequestResponseCallback;
 import everstore.vanilla.callback.RequestResponseCallbacks;
 import everstore.vanilla.io.EndianAwareOutputStream;
 import everstore.vanilla.protocol.DataStoreRequest;
-import everstore.vanilla.protocol.DataStoreResponse;
 import everstore.vanilla.protocol.messages.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,14 +115,26 @@ public class VanillaDataStorageSender implements Runnable {
      * to the server.
      */
     private void processReadJournalRequest(DataStoreRequest request, ReadJournalRequest body) throws IOException {
-        final Optional<EventsSnapshotEntry> snapshot = snapshotManager.flatMap(m -> m.load(body.journalName));
+        final Optional<EventsSnapshotEntry> snapshot = snapshotManager.flatMap(m -> m.load(body.journalName, body.offset));
         if (snapshot.isPresent()) {
+            // We need to replace the old callback with a new callback. This is because it must contain the new request
             final RequestResponseCallback callback = callbacks.removeAndGet(request.header.requestUID);
             final EventsSnapshotEntry entry = snapshot.get();
-            // TODO: Add support for partially read the snapshot and then the rest from the server
-            final DataStoreResponse response = new DataStoreResponse(request.header,
-                    new ReadJournalSnapshotResponse(entry.journalSize, entry.events));
-            callback.succeed(response);
+
+            // Recalculate the offset from where to read any new data
+            final JournalSize offset;
+            if (entry.journalSize.isLargerThan(body.offset))
+                offset = entry.journalSize;
+            else
+                offset = body.offset;
+
+            // Re-add the new request and send it to the server
+            final DataStoreRequest newRequest =
+                    new DataStoreRequest(request.header, new ReadJournalWithSnapshotRequest(body.journalName,
+                            offset, body.journalSize, entry));
+            callbacks.add(request.header.requestUID, callback.success, callback.failure, newRequest);
+            newRequest.write(outputStream);
+            outputStream.flush();
         } else {
             request.write(outputStream);
             outputStream.flush();
@@ -138,7 +149,7 @@ public class VanillaDataStorageSender implements Runnable {
             final NewTransactionResponse response = (NewTransactionResponse) dsr.response;
             transaction.complete(new VanillaTransaction(dataStorage, name, response.journalSize, dsr.header.workerUID,
                     response.transactionUID));
-        }, (e) -> transaction.completeExceptionally(new OpenTransactionFailed(name, e)));
+        }, (e) -> transaction.completeExceptionally(new OpenTransactionFailed(name, e)), request);
 
         try {
             requests.put(request);
@@ -159,7 +170,7 @@ public class VanillaDataStorageSender implements Runnable {
                 commitResult.complete(new CommitResult(true, events, response.journalSize));
             else
                 commitResult.complete(new CommitResult(false, events, response.journalSize));
-        }, (e) -> commitResult.completeExceptionally(new CommitTransactionFailed(transaction.name, e)));
+        }, (e) -> commitResult.completeExceptionally(new CommitTransactionFailed(transaction.name, e)), request);
 
         try {
             requests.put(request);
@@ -177,7 +188,7 @@ public class VanillaDataStorageSender implements Runnable {
         callbacks.add(request.header.requestUID, dsr -> {
             final RollbackTransactionResponse response = (RollbackTransactionResponse) dsr.response;
             rollbackResult.complete(response.success);
-        }, (e) -> rollbackResult.completeExceptionally(new RollbackFailed(transaction.name, e)));
+        }, (e) -> rollbackResult.completeExceptionally(new RollbackFailed(transaction.name, e)), request);
 
         try {
             requests.put(request);
@@ -194,7 +205,7 @@ public class VanillaDataStorageSender implements Runnable {
         callbacks.add(request.header.requestUID, dsr -> {
             final JournalExistsResponse response = (JournalExistsResponse) dsr.response;
             existsResult.complete(response.exists);
-        }, (e) -> existsResult.completeExceptionally(new JournalExistsException(name, e)));
+        }, (e) -> existsResult.completeExceptionally(new JournalExistsException(name, e)), request);
 
         try {
             requests.put(request);
@@ -211,13 +222,19 @@ public class VanillaDataStorageSender implements Runnable {
         final CompletableFuture<List<Object>> readResult = new CompletableFuture<>();
 
         callbacks.add(request.header.requestUID, dsr -> {
+            // Prepare and deserialize events raw data into event objects
             final ReadJournalResponse response = (ReadJournalResponse) dsr.response;
-            final List<Object> result = new ArrayList<>(response.events.size());
+            final List<Object> result = new ArrayList<>(response.events.size() + response.snapshottedEvents.size());
+            result.addAll(response.snapshottedEvents);
             for (final Event event : response.events)
                 result.add(serializer.convertFromString(event.data));
 
+            // Save a snapshot if a snapshot manager is present
+            snapshotManager.ifPresent(manager -> manager.save(transaction.name, new EventsSnapshotEntry(transaction.size(), result)));
+
+            // Send the result to the requester
             readResult.complete(result);
-        }, (e) -> readResult.completeExceptionally(new ReadEventsFailed(transaction.name, e)));
+        }, (e) -> readResult.completeExceptionally(new ReadEventsFailed(transaction.name, e)), request);
 
         try {
             requests.put(request);

@@ -14,6 +14,10 @@ public final class EventsSnapshotConfig {
         this(path, DEFAULT_MAX_BYTES, true, factory);
     }
 
+    public EventsSnapshotConfig(Path path, boolean cleanOnInt, EventsSnapshotManagerFactory factory) {
+        this(path, DEFAULT_MAX_BYTES, cleanOnInt, factory);
+    }
+
     /**
      * Configuration used for the SnapshotManager responsible for loading and saving raw events
      *

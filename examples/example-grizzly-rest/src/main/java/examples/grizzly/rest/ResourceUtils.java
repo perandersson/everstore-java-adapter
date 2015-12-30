@@ -32,7 +32,7 @@ public final class ResourceUtils {
     }
 
     public static <T> void handlePost(AsyncResponse response, Optional<T> result) {
-        response.setTimeout(1000, MILLISECONDS);
+        response.setTimeout(10000, MILLISECONDS);
 
         result.each(r -> {
             if (r == null) {
@@ -52,7 +52,7 @@ public final class ResourceUtils {
     }
 
     public static <T> void handleGet(AsyncResponse response, Optional<T> result) {
-        response.setTimeout(1000, MILLISECONDS);
+        response.setTimeout(10000, MILLISECONDS);
 
         result.each(r -> {
             if (r == null)

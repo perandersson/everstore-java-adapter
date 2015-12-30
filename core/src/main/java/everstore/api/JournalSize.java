@@ -23,6 +23,10 @@ public final class JournalSize implements Comparable<JournalSize> {
         return value < rhs.value;
     }
 
+    public boolean isSmallerOrEqualsThen(JournalSize rhs) {
+        return value <= rhs.value;
+    }
+
     public int sub(JournalSize rhs) {
         return value - rhs.value;
     }

@@ -1,6 +1,7 @@
 package everstore.vanilla.callback;
 
 import everstore.vanilla.RequestUID;
+import everstore.vanilla.protocol.DataStoreRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,7 @@ public class RequestResponseCallbacks {
         return result;
     }
 
-    public void add(RequestUID requestUID, CallbackSuccess success, CallbackFailed failure) {
-        callbacks.put(requestUID.value, new RequestResponseCallback(success, failure));
+    public void add(RequestUID requestUID, CallbackSuccess success, CallbackFailed failure, DataStoreRequest request) {
+        callbacks.put(requestUID.value, new RequestResponseCallback(success, failure, request));
     }
 }

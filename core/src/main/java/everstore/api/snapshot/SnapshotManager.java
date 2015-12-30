@@ -1,5 +1,7 @@
 package everstore.api.snapshot;
 
+import everstore.api.JournalSize;
+
 import java.util.Optional;
 
 public interface SnapshotManager<T> {
@@ -15,10 +17,11 @@ public interface SnapshotManager<T> {
     /**
      * Try to load a snapshot with the given name
      *
-     * @param name The name of the snapshot entry
+     * @param name   The name of the snapshot entry
+     * @param offset
      * @return A potential snapshot entry
      */
-    Optional<T> load(String name);
+    Optional<T> load(String name, JournalSize offset);
 
     /**
      * Retrieves how many bytes this manager is using on the HDD.

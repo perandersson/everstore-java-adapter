@@ -24,6 +24,7 @@ public class JavaKryoSnapshotManagerTest {
         final JavaKryoSnapshotManager unitToTest = new JavaKryoSnapshotManager(rootPath, false, 100);
 
         final JournalSize journalSize = new JournalSize(100);
+        final JournalSize offset = new JournalSize(0);
         final TestEvent event = new TestEvent(100);
 
         EventsSnapshotEntry objectToSave = new EventsSnapshotEntry(journalSize,
@@ -31,7 +32,7 @@ public class JavaKryoSnapshotManagerTest {
         unitToTest.save("/journal/item1", objectToSave);
 
         final long totalSize = unitToTest.memoryUsed();
-        final Optional<EventsSnapshotEntry> loadedObject = unitToTest.load("/journal/item1");
+        final Optional<EventsSnapshotEntry> loadedObject = unitToTest.load("/journal/item1", offset);
 
         assertEquals(92, totalSize);
         assertNotNull(loadedObject);

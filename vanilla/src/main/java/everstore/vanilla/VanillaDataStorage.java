@@ -11,6 +11,8 @@ import everstore.vanilla.callback.RequestResponseCallbacks;
 import everstore.vanilla.io.EndianAwareInputStream;
 import everstore.vanilla.io.EndianAwareOutputStream;
 import everstore.vanilla.protocol.messages.AuthenticateRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,6 +24,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public class VanillaDataStorage implements DataStorage {
+    private static final Logger log = LoggerFactory.getLogger(VanillaDataStorage.class);
 
     private final Socket client;
 
@@ -38,7 +41,7 @@ public class VanillaDataStorage implements DataStorage {
 
     public VanillaDataStorage(String username, String password,
                               final String hostname, final short port, final int bufferSize,
-                              final String name, final Serializer serializer, final Optional<EventsSnapshotConfig> eventsSnapshotConfig) throws IOException {
+                              final String name, final Serializer serializer, final Optional<EventsSnapshotManager> snapshotManager) throws IOException {
         final InetAddress address = InetAddress.getByName(hostname);
         this.client = new Socket(address, port);
         this.client.setSendBufferSize(bufferSize);
@@ -48,7 +51,7 @@ public class VanillaDataStorage implements DataStorage {
         this.password = password;
         this.name = name;
         this.serializer = serializer;
-        this.snapshotManager = eventsSnapshotConfig.map(c -> c.factory.create(c));
+        this.snapshotManager = snapshotManager;//eventsSnapshotConfig.map(c -> c.factory.create(c));
     }
 
     @Override
@@ -82,21 +85,21 @@ public class VanillaDataStorage implements DataStorage {
             if (receiver != null)
                 receiver.close();
         } catch (Exception e) {
-            // TODO: Log but otherwise ignore
+            log.debug("Could not close receiver", e);
         }
 
         try {
             if (sender != null)
                 sender.close();
         } catch (Exception e) {
-            // TODO: Log but otherwise ignore
+            log.debug("Could not close sender", e);
         }
 
         try {
             if (client != null)
                 client.close();
         } catch (Exception e) {
-            // TODO: Log but otherwise ignore
+            log.debug("Could not close client", e);
         }
     }
 

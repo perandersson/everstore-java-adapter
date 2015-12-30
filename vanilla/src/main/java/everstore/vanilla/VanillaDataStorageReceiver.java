@@ -4,8 +4,12 @@ import everstore.vanilla.callback.RequestResponseCallback;
 import everstore.vanilla.callback.RequestResponseCallbacks;
 import everstore.vanilla.io.EndianAwareInputStream;
 import everstore.vanilla.io.IntrusiveByteArrayOutputStream;
+import everstore.vanilla.protocol.DataStoreRequest;
 import everstore.vanilla.protocol.DataStoreResponse;
 import everstore.vanilla.protocol.Header;
+import everstore.vanilla.protocol.MessageResponse;
+import everstore.vanilla.protocol.messages.ReadJournalResponse;
+import everstore.vanilla.protocol.messages.ReadJournalWithSnapshotRequest;
 import everstore.vanilla.protocol.parsers.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +55,8 @@ public class VanillaDataStorageReceiver implements Runnable {
                     final ResponseState state = parser.parse(header, inputStream);
                     if (state.complete) {
                         final RequestResponseCallback callback = callbacks.removeAndGet(header.requestUID);
-                        callback.succeed(new DataStoreResponse(header, state.response));
+                        final MessageResponse response = postProcessResponse(callback.request, state.response);
+                        callback.succeed(new DataStoreResponse(header, response));
                     } else {
                         responseParsers.put(header.requestUID.value, parser.create(state));
                     }
@@ -64,6 +69,15 @@ public class VanillaDataStorageReceiver implements Runnable {
             // Let uncaughtException method handle the error
             throw new RuntimeException(e);
         }
+    }
+
+    private MessageResponse postProcessResponse(DataStoreRequest request, MessageResponse response) {
+        if (request.body instanceof ReadJournalWithSnapshotRequest) {
+            final ReadJournalResponse partialResponse = (ReadJournalResponse) response;
+            final ReadJournalWithSnapshotRequest snapshottedRequest = (ReadJournalWithSnapshotRequest) request.body;
+            return new ReadJournalResponse(partialResponse.events, snapshottedRequest.snapshotEntry.events);
+        }
+        return response;
     }
 
     /**
