@@ -14,7 +14,7 @@ public class App {
     public static void main(String[] args) throws Exception {
         // Adapter configuration
         final AdapterConfig config = new AdapterConfig("admin", "passwd",
-                "localhost", (short) 6929, 6, defaultSerializer(),
+                "localhost", 6929, 6, defaultSerializer(),
                 new VanillaDataStorageFactory());
 
         // Connect to the server

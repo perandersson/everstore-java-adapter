@@ -40,7 +40,7 @@ public class VanillaDataStorage implements DataStorage {
     private VanillaDataStorageSender sender;
 
     public VanillaDataStorage(String username, String password,
-                              final String hostname, final short port, final int bufferSize,
+                              final String hostname, final int port, final int bufferSize,
                               final String name, final Serializer serializer, final Optional<EventsSnapshotManager> snapshotManager) throws IOException {
         final InetAddress address = InetAddress.getByName(hostname);
         this.client = new Socket(address, port);
